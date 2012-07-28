@@ -1,0 +1,573 @@
+#! /usr/bin/perl -w
+use strict;
+use DBI;
+use POSIX;
+
+my $dbpath = "/var/lib/bank/testbank.db";
+our @result = ();
+our $action;
+our $title;
+our $user;
+our $id;
+our @actions = ();
+our %actions = ();
+our %q = ();
+our $db;
+our $uri = $ENV{REQUEST_URI};
+$uri =~ s/\?.*//;
+
+sub unescape($) {
+    local $_ = shift;
+    s/\+/ /g;
+    s/%(..)/chr(hex($1))/ge;
+    return $_;
+}
+
+sub htmlescape($) {
+    local $_ = shift;
+    return "" if !defined $_;
+    s/[&<\"]/sprintf("&#%d;", ord($&))/ge;
+    return $_;
+}
+
+sub random_bytes($) {
+    my $n = shift;
+    open(RANDOM, "</dev/urandom") or die "$0: /dev/urandom: $!\n";
+    my $bytes;
+    read(RANDOM, $bytes, $n);
+    close RANDOM;
+    return unpack("H$n", $bytes);
+}
+
+sub form {
+    my @r = ("<form method=POST action=\"", htmlescape($uri), "\">");
+    my @h = ();
+    push(@r, "<table class=form>");
+    while(@_) {
+        my $s = shift;
+        my $label = $s->{label} || "";
+        my $key = $s->{key};
+        if(!defined $key) {
+            $key = lc($label);
+            $key =~ s/\s+//g;
+        }
+        my $type = $s->{type} || ($key =~ /password/ ? "password" : "text");
+        if($type eq 'submit' and $key eq '') { $key = 'submit'; }
+        my $value = $s->{value} || "";
+        my @input;
+        if(exists $s->{select}) {
+            push(@input, "<select name=\"", htmlescape($key), "\">\n");
+            for my $option (@{$s->{select}}) {
+                if($option eq $value) { push(@input, "<option selected>"); }
+                else { push(@input, "<option>"); }
+                push(@input, htmlescape($option), "</option>\n");
+            }
+            push(@input, "</select>");
+        } elsif(exists $s->{multiselect}) {
+            push(@input, "<select multiple name=\"", htmlescape($key), "\">\n");
+            for my $option (@{$s->{multiselect}}) {
+                if(grep($option eq $_, @$value)) { push(@input, "<option selected>"); }
+                else { push(@input, "<option>"); }
+                push(@input, htmlescape($option), "</option>\n");
+            }
+            push(@input, "</select>");
+        } else {
+            @input = ("<input name=\"",
+                      htmlescape($key),
+                      "\" type=$type value=\"", htmlescape($value), "\">");
+        }
+        if($type eq 'hidden') {
+            push(@h, @input);
+        } else {
+            push(@r, "<tr><td>$label</td><td>", @input, "</td></tr>\n");
+        }
+    }
+    push(@r, "</table>");
+    push(@r, @h, "</form>\n");
+    return @r;
+}
+
+sub action(&$) {
+    my ($code, $label) = @_;
+    my $name = $label;
+    $name =~ s/\s+/_/g;
+    push(@actions, $name);
+    $actions{$name} = {
+        label=>$label,
+        code=>$code
+    };
+}
+
+sub query($@) {
+    my $sql = shift;
+    my $s = $db->prepare($sql);
+    $s->execute(@_);
+    return $s;
+}
+
+sub accounts() {
+    my $s = query("SELECT user FROM accounts ORDER BY user");
+    my @accounts = ();
+    while(my @p = $s->fetchrow_array()) { push(@accounts, $p[0]); }
+    return @accounts;
+}
+
+sub transactions {
+    my $offset = $q{offset} || 0;
+    $offset = int($offset);
+    my @accounts = accounts();
+    my $username = $q{username} || "(all)";
+    $username = "(all)" if(!grep($_ eq $username, @accounts));
+    my @balances = ();
+    my $s;
+    if($username ne "(all)") {
+        $s = query("SELECT time,id,user,description,origin,destination,amount,origin_balance_after,destination_balance_after FROM transactions WHERE origin=? OR destination=? ORDER BY id DESC LIMIT 21 OFFSET ?",
+                   $username, $username, $offset);
+        @balances = ($username);
+    } else {
+        $s = query("SELECT time,id,user,description,origin,destination,amount,origin_balance_after,destination_balance_after FROM transactions ORDER BY id DESC LIMIT 21 OFFSET ?",
+                   $offset);
+        @balances = @accounts;
+    }
+    push(@result, "<form method=POST>\n");
+    push(@result, "<p>Transactions for:\n");
+    push(@result, "<input type=hidden name=action value=Transactions>\n");
+    push(@result, "<select name=username onchange=\"this.form.submit()\">\n");
+    for my $account ("(all)", @accounts) {
+        push(@result, "<option", ($account eq $username ? " selected" : ""), ">", htmlescape($account), "</option>\n");
+    }
+    push(@result, "</select>\n");
+    push(@result, "<noscript><input type=submit name=submit value=Change></noscript>\n");
+    push(@result, "</p>\n");
+    push(@result, "</form>\n");
+    push(@result, "<table class=transactions><thead>\n");
+    my @headings = qw{Time ID User Description Amount From To};
+    push(@result, "<tr><th colspan=", scalar @headings, "></td>",
+         "<th class=balance colspan=", scalar @balances, ">Balances</td>",
+         "</tr>\n");
+    push(@result, "<tr>",
+         join("", map("<th>$_</th>", @headings),
+                  map("<th class=balance>$_</th>", @balances)),
+         "</tr>\n");
+    my $n = 0;
+    my $current_day = "";
+    while(my @p = $s->fetchrow_array()) {
+        ++$n;
+        next if $n == 21;
+        my($timestamp, $id, $user, $description,$origin,$destination,$amount,$obalance,$dbalance) = @p;
+        my $day = POSIX::strftime("%F", localtime($timestamp));
+        my $time = POSIX::strftime("%T", localtime($timestamp));
+        if($day eq $current_day) {
+            $day = "";
+        } else {
+            $current_day = $day;
+        }
+        push(@result, "<tr>");
+        push(@result, "<td class=time>$day $time</td>");
+        push(@result, "<td class=id>", htmlescape($id), "</td>");
+        push(@result, "<td class=account>", htmlescape($user), "</td>");
+        push(@result, "<td class=description>", htmlescape($description), "</td>");
+        push(@result, "<td class=payment_amount>", sprintf("%.02f", $amount / 100), "</td>");
+        push(@result, "<td class=account>", htmlescape($origin), "</td>");
+        push(@result, "<td class=account>", htmlescape($destination), "</td>");
+        for my $account (@balances) {
+            my $value = "";
+            if($account eq $origin) { $value = sprintf("%.02f", $obalance / 100); }
+            if($account eq $destination) { $value = sprintf("%.02f", $dbalance / 100); }
+            push(@result, "<td class=balance_amount>$value</td>");
+        }
+        push(@result, "</tr>\n");
+    }
+    push(@result, "</table>\n");
+    push(@result, "<p>\n");
+    if($offset > 0) {
+        push(@result, "<form method=POST>\n");
+        push(@result, "<input type=hidden name=offset value=", $offset-20, ">\n");
+        push(@result, "<input type=hidden name=action value=Transactions>\n");
+        push(@result, "<input type=hidden name=user value=\"", htmlescape($q{user}), "\">\n") if exists $q{user};
+        push(@result, "<input type=submit name=submit value=Newer>\n");
+        push(@result, "</form>\n");
+    }
+    if($n == 21) {
+        push(@result, "<form method=POST>\n");
+        push(@result, "<input type=hidden name=offset value=", $offset+20, ">\n");
+        push(@result, "<input type=hidden name=action value=Transactions>\n");
+        push(@result, "<input type=hidden name=user value=\"", htmlescape($q{user}), "\">\n") if exists $q{user};
+        push(@result, "<input type=submit name=submit value=Older>\n");
+        push(@result, "</form>\n");
+    }
+    push(@result, "</p>\n");
+}
+
+sub transfer($$$$);
+
+sub transfer($$$$) {
+    my ($description, $origin, $destination, $amount) = @_;
+    if($amount < 0) {
+        transfer($description, $destination, $origin, -$amount);
+    } else {
+        my $s = query("SELECT balance FROM accounts WHERE user=?",
+                   $origin);
+        my @p = $s->fetchrow_array();
+        if(@p != 1) {
+            die "Failed to get balance for $origin.\n";
+        }
+        my $origin_balance = $p[0];
+        $s = query("SELECT balance FROM accounts WHERE user=?",
+                   $destination);
+        @p = $s->fetchrow_array();
+        if(@p != 1) {
+            die "Failed to get balance for $destination.\n";
+        }
+        my $destination_balance = $p[0];
+        $origin_balance -= $amount;
+        $destination_balance += $amount;
+        query("INSERT INTO transactions (time, user, description, origin, destination, amount, origin_balance_after, destination_balance_after) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              time(), $user, $description, $origin, $destination, $amount, $origin_balance, $destination_balance);
+        query("UPDATE accounts SET balance=? WHERE user=?",
+              $origin_balance, $origin);
+        query("UPDATE accounts SET balance=? WHERE user=?",
+              $destination_balance, $destination);
+    }
+}
+
+action {
+    transactions();
+} "Transactions";
+
+action {
+    eval {
+        if(exists $q{description}
+           and exists $q{origin}
+           and exists $q{destination}
+           and exists $q{amount}
+           and $ENV{REQUEST_METHOD} eq 'POST') {
+            if($q{amount} !~ /^\d+(\.\d\d)?$/) {
+                die "Invalid amount.\n";
+            }
+            my $amount = 100 * $q{amount};
+            if($q{origin} eq $q{destination}) {
+                die "Origin and destination must differ.\n";
+            }
+            my $s = query("SELECT user FROM accounts WHERE user=?",
+                          $q{origin});
+            if(!$s->fetchrow_array()) {
+                die "Unknown origin.\n";
+            }
+            $s = query("SELECT user FROM accounts WHERE user=?",
+                       $q{destination});
+            if(!$s->fetchrow_array()) {
+                die "Unknown destination.\n";
+            }
+            transfer($q{description}, $q{origin}, $q{destination}, $amount);
+            $db->commit();
+            delete $q{amount};
+            push(@result, "<p>Transaction saved.</p>");
+        }
+    };
+    push(@result, "<p>", htmlescape($@), "</p>\n") if $@;
+    my @accounts = accounts();
+    push(@result, form({label=>"Description", value=>$q{description}},
+                       {label=>"Origin", value=>$q{origin}, select=>\@accounts},
+                       {label=>"Destination", value=>$q{destination}, select=>\@accounts},
+                       {label=>"Amount", value=>$q{amount}},
+                       {type=>"submit", value=>"New Transaction"}));
+    transactions();
+} "New Transaction";
+
+action {
+    my @accounts = accounts();
+    eval {
+        if(exists $q{description}
+           and exists $q{origin}
+           and exists $q{destinations}
+           and $ENV{REQUEST_METHOD} eq 'POST') {
+            if(!grep($_ eq $q{origin}, @accounts)) {
+                die "Unknown origin.\n";
+            }
+            my @destinations = @{$q{destinations}};
+            for my $destination (@destinations) {
+                if(!grep($_ eq $destination, @accounts)) {
+                    die "Unknown destination.\n";
+                }
+            }
+            if(grep($_ eq $q{origin}, @destinations)) {
+                die "Origin must not be among destinations.\n";
+            }
+            if(scalar @destinations < 2) {
+                die "Need more than one destination.\n";
+            }
+            my $s = query("SELECT balance FROM accounts WHERE user=?",
+                          $q{origin});
+            my @p = $s->fetchrow_array();
+            if(@p != 1) {
+                die "Failed to get balance for $q{origin}.\n";
+            }
+            my $origin_balance = $p[0];
+            my $share = int($origin_balance / scalar @destinations);
+            if($share == 0) {
+                die "Not enough to distribute.\n";
+            }
+            for my $destination (@destinations) {
+                transfer($q{description}, $q{origin}, $destination, $share);
+            }
+            $db->commit();
+            push(@result, "<p>Transactions saved.</p>");
+        }
+    };
+    push(@result, "<p>", htmlescape($@), "</p>\n") if $@;
+    push(@result, form({label=>"Description", value=>$q{description}},
+                       {label=>"Origin", value=>$q{origin}, select=>\@accounts},
+                       {label=>"Destinations", value=>($q{destinations} || []), multiselect=>\@accounts},
+                       {type=>"submit", value=>"Distribute"}));
+    transactions();
+} "Distribute";
+
+action {
+    eval {
+        if(exists $q{newusername}
+           and exists $q{newpassword}
+           and exists $q{confirmpassword}
+           and $ENV{REQUEST_METHOD} eq 'POST') {
+            if($q{newpassword} ne $q{confirmpassword}) {
+                die "Passwords do not match.\n";
+            }
+            if($q{newusername} !~ /^[a-z0-9]+$/
+               or length($q{newusername}) > 32) {
+                die "Invalid username.\n";
+            }
+            my $s = query("SELECT user FROM users WHERE user=?",
+                          $q{newusername});
+            if(my @p = $s->fetchrow_array()) {
+                die "User already exists.\n";
+            }
+            $s = query("SELECT user FROM accounts WHERE user=?",
+                       $q{newusername});
+            if(my @p = $s->fetchrow_array()) {
+                die "User already has an account.\n";
+            }
+            query("INSERT INTO users (user, password) VALUES (?, ?)",
+                  $q{newusername}, $q{newpassword});
+            query("INSERT INTO accounts (user, balance) VALUES (?, ?)",
+                   $q{newusername}, 0);
+            $db->commit();
+            push(@result, "<p>User $q{newusername} created.</p>");
+        }
+    };
+    push(@result, "<p>", htmlescape($@), "</p>\n") if $@;
+    push(@result, form({label=>"New Username",value=>$q{newusername}},
+                       {label=>"New Password"},
+                       {label=>"Confirm password"},
+                       {type=>"submit", value=>"New User"}));
+} "New User";
+
+action {
+    eval {
+        if(exists $q{newaccountname}
+           and $ENV{REQUEST_METHOD} eq 'POST') {
+            if($q{newaccountname} !~ /^[a-z0-9]+$/
+               or length($q{newaccountname}) > 32) {
+                die "Invalid account name.\n";
+            }
+            my $s = query("SELECT user FROM accounts WHERE user=?",
+                          $q{newaccountname});
+            if(my @p = $s->fetchrow_array()) {
+                die "Account already exists.\n";
+            }
+            query("INSERT INTO accounts (user, balance) VALUES (?, ?)",
+                  $q{newaccountname}, 0);
+            $db->commit();
+            push(@result, "<p>Account $q{newaccountname} created.</p>");
+        }
+    };
+    push(@result, "<p>", htmlescape($@), "</p>\n") if $@;
+    push(@result, form({label=>"New Account name",value=>$q{newaccountname}},
+                       {type=>"submit", value=>"New Account"}));
+} "New Account";
+
+action {
+    eval {
+        if(exists $q{oldpassword}
+           and exists $q{newpassword}
+           and exists $q{confirmnewpassword}) {
+            if($q{newpassword} eq $q{confirmnewpassword}) {
+                my $s = query("SELECT password FROM users WHERE user=?",
+                              $user);
+                if(my @p = $s->fetchrow_array()) {
+                    if($p[0] eq $q{oldpassword}) {
+                        query("UPDATE users SET password=? WHERE user=?",
+                              $q{newpassword}, $user);
+                        $db->commit();
+                        push(@result, "<p>Password updated.</p>\n");
+                    } else {
+                        die "Invalid username or password.\n";
+                    }
+                } else {
+                    die "No such user.\n";
+                }
+            } else {
+                die "New password fields don't match.\n";
+            }
+        }
+    };
+    push(@result, "<p>", htmlescape($@), "</p>\n") if $@;
+    push(@result, form({label=>"Old Password"},
+                       {label=>"New Password"},
+                       {label=>"Confirm new password"},
+                       {type=>"submit", value=>"Change Password"}));
+} "Change Password";
+
+action {
+    query("DELETE FROM sessions WHERE id = ? OR expires <= ?", $id, time());
+    $db->commit();
+    print STDERR "bank: deleted session: $id\n";
+    undef $id;
+} "Logout";
+
+# Parse the query string
+my $query;
+if($ENV{REQUEST_METHOD} eq 'GET') {
+    $query = $ENV{QUERY_STRING};
+} else {
+    my $bytes = $ENV{CONTENT_LENGTH};
+    read(STDIN, $query, $bytes);
+}
+#print STDERR "query=$query\n";
+for my $q (split(/&/, $query)) {
+    if($q =~ /^([^=]+)=(.*)/) {
+        my $key = unescape($1);
+        my $value = unescape($2);
+        if($key =~ /s$/) {
+            push(@{$q{$key}}, $value);
+        } else {
+            $q{$key} = $value;
+        }
+    }
+}
+
+# Open the database
+$db = DBI->connect("dbi:SQLite:dbname=$dbpath", "", "",
+                   {
+                       AutoCommit => 0,
+                       RaiseError => 1,
+                   });
+
+eval {
+    if(exists $q{action}
+       and $q{action} eq 'Login'
+       and exists $q{username}
+       and exists $q{password}
+       and $ENV{REQUEST_METHOD} eq 'POST') {
+        # This is a login attempt
+        my $s = query("SELECT password FROM users WHERE user=?",
+                      $q{username});
+        if(my @p = $s->fetchrow_array()) {
+            if($p[0] eq $q{password}) {
+                $user = $q{username};
+                my $expires = time + 86400 * 7;
+                $id = random_bytes(32);
+                query("INSERT INTO sessions (user,expires,id) VALUES (?,?,?)",
+                      $user, $expires, $id);
+                $db->commit();
+                print STDERR "bank: logged in as $user\n";
+                print "Location: http://$ENV{SERVER_NAME}$ENV{SCRIPT_NAME}/Transactions\n";
+                print "Set-Cookie: bank=$id;Version=1\n"; # TODO path
+                print "\n";
+                exit 0;
+            } else {
+                print STDERR "bank: incorrect password for $q{username}\n";
+                die "Incorrect username or password.\n";
+            }
+        } else {
+            print STDERR "bank: unknown username $q{username}\n";
+            die "Incorrect username or password.\n";
+        }
+    } elsif(exists $ENV{HTTP_COOKIE}) {
+        my $cookie = $ENV{HTTP_COOKIE};
+        if($cookie !~ /bank=([0-9a-fA-F]+)/) {
+            print STDERR "bank: unsuitable cookie header: $cookie\n";
+            die "Unsuitable cookie.\n";
+        }
+        $cookie = $1;
+        my $s = query("SELECT user,expires FROM sessions WHERE id = ?",
+                      $cookie);
+        if(my @p = $s->fetchrow_array()) {
+            my $expires = $p[1];
+            if(time() < $expires) {
+                $id = $cookie;
+                $user = $p[0];
+                #print STDERR "bank: recovered session for $user\n";
+            } else {
+                query("DELETE FROM sessions WHERE expires <= ?",
+                      time());
+                $db->commit();
+                print STDERR "bank: expired session: $cookie\n";
+                die "Not logged in.\n";
+            }
+        } else {
+            print STDERR "bank: unknown session: $cookie\n";
+            die "Not logged in.\n";
+        }
+    } else {
+        die "Not logged in.\n";
+    }
+};
+if($@) {
+    $title = $action = "Error";
+    @result = ("<p>", htmlescape($@), "</p>\n");
+}
+
+if(defined $id) {
+    if(exists($q{action})) {
+        $action = $q{action};
+    } elsif(exists $ENV{PATH_INFO}) {
+        $action = $ENV{PATH_INFO};
+        $action =~ s,^/,,;
+    } else {
+        $action = 'Transactions';
+    }
+    eval {
+        @result = ();
+        if(!exists $actions{$action}) {
+            $action = 'Transactions';
+        }
+        $title = $actions{$action}->{label};
+        $actions{$action}->{code}->();
+    };
+    if($@) {
+        $title = $action = "Error";
+        @result = ("<p>", htmlescape($@), "</p>\n");
+    }
+}
+if(!defined $id) {
+    #print STDERR "session id is not defined\n";
+    $title = "Login Required";
+    push(@result, form({label=>"Username", value=>$q{username}},
+                       {label=>"Password"},
+                       {label=>"action", type=>"hidden", value=>"Login"},
+                       {key=>"submit", type=>"submit", value=>"Login"}));
+}
+print "Content-Type: text/html\n";
+print "Cache-Control: no-cache\n";
+print "\n";
+my @header = ("<p>",
+              join(" | ",
+                   map("<a href=\"$ENV{SCRIPT_NAME}/$_\">$actions{$_}->{label}</a>", @actions)),
+              "</p>");
+print "<html><head>\n";
+print "<style type=\"text/css\" media=screen>\n";
+print "table.transactions { border-collapse: collapse }\n";
+print "table.transactions td { border: 1px solid }\n";
+print "td.time { text-align: right }\n";
+print "td.id { text-align: right }\n";
+print "td.balance_amount, td.payment_amount { text-align: right }\n";
+print "td.balance_amount, th.balance { background-color: #e0ffff }\n";
+print "</style>\n";
+print "<title>", htmlescape($title), "</title></head>\n";
+print "<body>\n";
+print "@header\n";
+print "<hr>\n";
+print "<h1>", htmlescape($title), "</h1>\n";
+print @result;
+print "<hr>\n";
+#print "@header\n";

@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+	ServerAdmin webmaster@sfere.greenend.org.uk
+	ServerName testbank.anjou.terraraq.org.uk
+        ServerAlias testbank
+	DocumentRoot /var/www/testbank
+	Alias /icons/ /usr/share/apache/icons/
+	ErrorLog /var/log/apache2/testbank/error.log
+	LogLevel warn
+	CustomLog /var/log/apache2/testbank/access.log combined
+	RedirectMatch ^/$ http://testbank.anjou.terraraq.org.uk/bank/
+        SuexecUserGroup bank bank
+</VirtualHost>
+
+<Directory /var/www/testbank>
+        <Files bank>
+                Options ExecCGI
+                SetHandler cgi-script
+        </Files>
+</Directory>
