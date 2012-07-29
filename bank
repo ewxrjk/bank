@@ -2,6 +2,7 @@
 use strict;
 use DBI;
 use POSIX;
+use Digest::SHA;
 
 my $dbpath = "/var/lib/bank/testbank.db";
 our @result = ();
@@ -30,13 +31,38 @@ sub htmlescape($) {
     return $_;
 }
 
-sub random_bytes($) {
+sub random_bytes_hex($) {
     my $n = shift;
     open(RANDOM, "</dev/urandom") or die "$0: /dev/urandom: $!\n";
     my $bytes;
     read(RANDOM, $bytes, $n);
     close RANDOM;
     return unpack("H$n", $bytes);
+}
+
+sub pwhash($$) {
+    my ($alg, $salt, $password) = @_;
+    my $input = "$alg:$salt:$password:$salt:$alg";
+    if($alg eq "sp-sha1") { return Digest::SHA::sha1_hex($input); }
+    if($alg eq "sp-sha256") { return Digest::SHA::sha256_hex($input); }
+    if($alg eq "sp-sha384") { return Digest::SHA::sha384_hex($input); }
+    if($alg eq "sp-sha512") { return Digest::SHA::sha512_hex($input); }
+    die "Unrecognized password confidentially algorthm.\n";
+}
+
+sub pwstore($) {
+    my ($password) = @_;
+    my $alg = "sp-sha1";
+    my $salt = random_bytes_hex(16);
+    my $hashed = pwhash($alg, $salt, $password);
+    return "$alg:$salt:$hashed";
+}
+
+sub pwcheck($$) {
+    my ($stored, $password) = @_;
+    my ($alg, $salt, $hashed) = split(/:/, $stored);
+    my $rehashed = pwhash($alg, $salt, $password);
+    return ($hash eq $rehashed);
 }
 
 sub form {
@@ -465,7 +491,7 @@ eval {
             if($p[0] eq $q{password}) {
                 $user = $q{username};
                 my $expires = time + 86400 * 7;
-                $id = random_bytes(32);
+                $id = random_bytes_hex(32);
                 query("INSERT INTO sessions (user,expires,id) VALUES (?,?,?)",
                       $user, $expires, $id);
                 $db->commit();

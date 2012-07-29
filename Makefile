@@ -6,11 +6,14 @@ INSTALL=install
 all: bank.real bank.site.real
 
 bank.real: bank
+	rm -f bank.real
 	sed < bank > bank.real s/testbank/bank/g;
-	chmod 755 bank.real
+	chmod 555 bank.real
 
 bank.site.real: bank.site
+	rm -f bank.site.real
 	sed < bank.site > bank.site.real s/testbank/bank/g;
+	chmod 444 bank.site.real
 
 check:
 	perl -wc bank
