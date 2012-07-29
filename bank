@@ -40,29 +40,35 @@ sub random_bytes_hex($) {
     return unpack("H$n", $bytes);
 }
 
-sub pwhash($$) {
-    my ($alg, $salt, $password) = @_;
-    my $input = "$alg:$salt:$password:$salt:$alg";
-    if($alg eq "sp-sha1") { return Digest::SHA::sha1_hex($input); }
-    if($alg eq "sp-sha256") { return Digest::SHA::sha256_hex($input); }
-    if($alg eq "sp-sha384") { return Digest::SHA::sha384_hex($input); }
-    if($alg eq "sp-sha512") { return Digest::SHA::sha512_hex($input); }
-    die "Unrecognized password confidentially algorthm.\n";
+sub pwhash($$$$) {
+    my ($alg, $rounds, $salt, $password) = @_;
+    my $input = $password;
+    while($rounds-- > 0) {
+        $input = "$rounds:$salt:$input:$salt:$rounds";
+        if($alg eq "sp-sha1") { $input = Digest::SHA::sha1_hex($input); }
+        elsif($alg eq "sp-sha256") { $input = Digest::SHA::sha256_hex($input); }
+        elsif($alg eq "sp-sha384") { $input = Digest::SHA::sha384_hex($input); }
+        elsif($alg eq "sp-sha512") { $input = Digest::SHA::sha512_hex($input); }
+        else { die "Unrecognized password confidentially algorthm.\n"; }
+    }
+    return $input;
 }
 
 sub pwstore($) {
     my ($password) = @_;
     my $alg = "sp-sha1";
+    my $rounds = 100000;
     my $salt = random_bytes_hex(16);
-    my $hashed = pwhash($alg, $salt, $password);
-    return "$alg:$salt:$hashed";
+    my $hashed = pwhash($alg, $rounds, $salt, $password);
+    return "$alg:$rounds:$salt:$hashed";
 }
 
 sub pwcheck($$) {
     my ($stored, $password) = @_;
-    my ($alg, $salt, $hashed) = split(/:/, $stored);
-    my $rehashed = pwhash($alg, $salt, $password);
-    return ($hash eq $rehashed);
+    if($stored eq '') { return 1; }
+    my ($alg, $rounds, $salt, $hashed) = split(/:/, $stored);
+    my $rehashed = pwhash($alg, $rounds, $salt, $password);
+    return ($hashed eq $rehashed);
 }
 
 sub form {
@@ -420,9 +426,9 @@ action {
                 my $s = query("SELECT password FROM users WHERE user=?",
                               $user);
                 if(my @p = $s->fetchrow_array()) {
-                    if($p[0] eq $q{oldpassword}) {
+                    if(pwcheck($p[0], $q{oldpassword})) {
                         query("UPDATE users SET password=? WHERE user=?",
-                              $q{newpassword}, $user);
+                              pwstore($q{newpassword}), $user);
                         $db->commit();
                         push(@result, "<p>Password updated.</p>\n");
                     } else {
@@ -488,7 +494,7 @@ eval {
         my $s = query("SELECT password FROM users WHERE user=?",
                       $q{username});
         if(my @p = $s->fetchrow_array()) {
-            if($p[0] eq $q{password}) {
+            if(pwcheck($p[0], $q{password})) {
                 $user = $q{username};
                 my $expires = time + 86400 * 7;
                 $id = random_bytes_hex(32);
@@ -505,6 +511,7 @@ eval {
                 die "Incorrect username or password.\n";
             }
         } else {
+            pwcheck("sp-sha1:100000:ec875cd841c37c19:faf42b3a4cde01b178b6cc64be49a1b1e8e1a0ed", $q{password});
             print STDERR "bank: unknown username $q{username}\n";
             die "Incorrect username or password.\n";
         }
