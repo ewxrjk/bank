@@ -15,6 +15,7 @@ our %actions = ();
 our %q = ();
 our $db;
 our $uri = $ENV{REQUEST_URI};
+our $type = "text/html";
 $uri =~ s/\?.*//;
 
 sub unescape($) {
@@ -69,6 +70,12 @@ sub pwcheck($$) {
     my ($alg, $rounds, $salt, $hashed) = split(/:/, $stored);
     my $rehashed = pwhash($alg, $rounds, $salt, $password);
     return ($hashed eq $rehashed);
+}
+
+sub csv_quote($) {
+    local $_ = shift;
+    s/\"/\"\"/g;
+    return "\"$_\"";
 }
 
 sub form {
@@ -450,6 +457,28 @@ action {
 } "Change Password";
 
 action {
+    $type = "text/csv";
+    push(@result,
+         join(",",
+              map("\"$_\"",
+                  qw{ID TIME USER DESCRIPTION ORIGIN DESTINATION AMOUNT})),
+         "\n");
+    my $s = query("SELECT id,time,user,description,origin,destination,amount FROM transactions ORDER BY id");
+    while(my @p = $s->fetchrow_array()) {
+        push(@result,
+             join(",",
+                  $p[0],
+                  $p[1],
+                  csv_quote($p[2]),
+                  csv_quote($p[3]),
+                  csv_quote($p[4]),
+                  csv_quote($p[5]),
+                  $p[6]),
+             "\n");
+    }
+} "Export";
+
+action {
     query("DELETE FROM sessions WHERE id = ? OR expires <= ?", $id, time());
     $db->commit();
     print STDERR "bank: deleted session: $id\n";
@@ -580,27 +609,31 @@ if(!defined $id) {
                        {label=>"action", type=>"hidden", value=>"Login"},
                        {key=>"submit", type=>"submit", value=>"Login"}));
 }
-print "Content-Type: text/html\n";
+print "Content-Type: $type\n";
 print "Cache-Control: no-cache\n";
 print "\n";
-my @header = ("<p>",
-              join(" | ",
-                   map("<a href=\"$ENV{SCRIPT_NAME}/$_\">$actions{$_}->{label}</a>", @actions)),
-              "</p>");
-print "<html><head>\n";
-print "<style type=\"text/css\" media=screen>\n";
-print "table.transactions { border-collapse: collapse }\n";
-print "table.transactions td { border: 1px solid }\n";
-print "td.time { text-align: right }\n";
-print "td.id { text-align: right }\n";
-print "td.balance_amount, td.payment_amount { text-align: right }\n";
-print "td.balance_amount, th.balance { background-color: #e0ffff }\n";
-print "</style>\n";
-print "<title>", htmlescape($title), "</title></head>\n";
-print "<body>\n";
-print "@header\n";
-print "<hr>\n";
-print "<h1>", htmlescape($title), "</h1>\n";
-print @result;
-print "<hr>\n";
-#print "@header\n";
+if($type eq 'text/html') {
+    my @header = ("<p>",
+                  join(" | ",
+                       map("<a href=\"$ENV{SCRIPT_NAME}/$_\">$actions{$_}->{label}</a>", @actions)),
+                  "</p>");
+    print "<html><head>\n";
+    print "<style type=\"text/css\" media=screen>\n";
+    print "table.transactions { border-collapse: collapse }\n";
+    print "table.transactions td { border: 1px solid }\n";
+    print "td.time { text-align: right }\n";
+    print "td.id { text-align: right }\n";
+    print "td.balance_amount, td.payment_amount { text-align: right }\n";
+    print "td.balance_amount, th.balance { background-color: #e0ffff }\n";
+    print "</style>\n";
+    print "<title>", htmlescape($title), "</title></head>\n";
+    print "<body>\n";
+    print "@header\n";
+    print "<hr>\n";
+    print "<h1>", htmlescape($title), "</h1>\n";
+    print @result;
+    print "<hr>\n";
+    #print "@header\n";
+} else {
+    print @result;
+}
