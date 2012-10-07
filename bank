@@ -386,7 +386,7 @@ action {
                 die "User already has an account.\n";
             }
             query("INSERT INTO users (user, password) VALUES (?, ?)",
-                  $q{newusername}, $q{newpassword});
+                  $q{newusername}, pwstore($q{newpassword}));
             query("INSERT INTO accounts (user, balance) VALUES (?, ?)",
                    $q{newusername}, 0);
             $db->commit();
