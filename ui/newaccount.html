@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>New Account ({{.Title}})</title>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="/app.js"></script>
+        <link rel=StyleSheet type="text/css" href="/app.css">
+    </head>
+    <body>
+        <p><a href="/">Transactions</a> | <a href="/transaction.html">New Transaction</a> | <a href="/distribute.html">Distribute</a> | <a href="/newuser.html">New User</a> | <a href="/newaccount.html">New Account</a> | <a href="/password.html">Change Password</a> | <a href="/logout.html">Logout</a> </p>
+        <hr>
+        <h1>{{.Title}}: New Account</h1>
+
+        <form id=newaccount>
+            <table class=form>
+                <tr>
+                    <td>Account name</td>
+                    <td><input id=account type=text value="" class="nonempty newaccount"></td>
+                    <td class=error></td>
+                </tr>
+                <tr></tr>
+                    <td></td>
+                    <td><input type=submit value=Create class=submit></td>
+                    <td id=error class=error></td>
+                    <td id=success class=success></td>
+                </tr>
+            </table>
+            <input name=token type=hidden value="{{.Token}}" id=token>
+        </form>
+    </body>
+</html>

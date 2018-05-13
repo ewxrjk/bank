@@ -1,0 +1,15 @@
+[[constraint]]
+  name = "github.com/mattn/go-sqlite3"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "golang.org/x/crypto"
+  revision = "94e3fad7f1b4eed4ec147751ad6b4c4d33f00611"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.1"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.2"

@@ -1,0 +1,8 @@
+table.transactions { border-collapse: collapse }
+table.transactions td { border: 1px solid }
+td.time { text-align: right }
+td.id { text-align: right }
+td.balance_amount, td.payment_amount { text-align: right }
+td.balance_amount, th.balance { background-color: #e0ffff }
+td.error { color: red }
+td.success { color: green }
