@@ -18,12 +18,13 @@ import (
 	"time"
 )
 
-var serverAddress, serverKey, serverCert string
+var serverAddress, serverKey, serverCert, serviceName string
 
 func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
+	serverCmd.PersistentFlags().StringVarP(&serviceName, "name", "n", "Bank", "service name")
 }
 
 var secure bool
@@ -458,7 +459,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		writer := strings.Builder{}
 		data := TemplateData{
 			Token: "not logged in",
-			Title: "Anjou Bank", // TODO configuration
+			Title: serviceName,
 		}
 		if session := getSession(w, r); session != nil {
 			data.Token = session.token
