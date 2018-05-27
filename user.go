@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"errors"
 	// sqlite3 "github.com/mattn/go-sqlite3"
 	"database/sql"
 )
@@ -13,6 +14,9 @@ type User struct {
 	// Hashed password
 	Password string
 }
+
+// ErrNoSuchUser is returned when accessing a user who does not exist.
+var ErrNoSuchUser = errors.New("user does not exist")
 
 // GetUsers returns the list of user names.
 func GetUsers(tx *sql.Tx) (users []string, err error) {
@@ -35,6 +39,9 @@ func GetUsers(tx *sql.Tx) (users []string, err error) {
 // Get fills in the data for a user.
 func (u *User) Get(tx *sql.Tx, user string) (err error) {
 	err = tx.QueryRow("SELECT user, password FROM users WHERE user=?", user).Scan(&u.User, &u.Password)
+	if err == sql.ErrNoRows {
+		err = ErrNoSuchUser
+	}
 	if err != nil {
 		return
 	}

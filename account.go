@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"errors"
 	// sqlite3 "github.com/mattn/go-sqlite3"
 	"database/sql"
 )
@@ -13,6 +14,9 @@ type Account struct {
 	// Current balance
 	Balance int
 }
+
+// ErrNoSuchAccount is returned when accessing an account whic does not exist.
+var ErrNoSuchAccount = errors.New("account does not exist")
 
 // GetAccounts returns the list of account names.
 func GetAccounts(tx *sql.Tx) (accounts []string, err error) {
@@ -35,6 +39,9 @@ func GetAccounts(tx *sql.Tx) (accounts []string, err error) {
 // Get fills in the data for a account.
 func (a *Account) Get(tx *sql.Tx, account string) (err error) {
 	err = tx.QueryRow("SELECT user, balance FROM accounts WHERE user=?", account).Scan(&a.Account, &a.Balance)
+	if err == sql.ErrNoRows {
+		err = ErrNoSuchAccount
+	}
 	if err != nil {
 		return
 	}

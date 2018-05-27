@@ -141,7 +141,7 @@ func (b *Bank) CheckPassword(user, password string) (err error) {
 		}
 		return
 	})
-	if err != nil && err != ErrPasswordMismatch {
+	if err != nil && err != ErrPasswordMismatch && err != ErrNoSuchUser {
 		err = fmt.Errorf("verifying password for %s: %v", user, err)
 	}
 	return

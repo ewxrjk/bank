@@ -23,7 +23,7 @@ func TestApiUser(t *testing.T) {
 	assert.NoError(t, b.CheckPassword("fred", "fredpass"))
 	assert.Equal(t, ErrPasswordMismatch, b.CheckPassword("fred", "wrongpass"))
 	assert.Equal(t, ErrPasswordMismatch, b.CheckPassword("fred", ""))
-	assert.NotNil(t, b.CheckPassword("bob", "fredpass")) // TODO ugly
+	assert.Equal(t, ErrNoSuchUser, b.CheckPassword("bob", "fredpass"))
 
 	assert.NoError(t, b.SetPassword("fred", "newpass"))
 	assert.NoError(t, b.CheckPassword("fred", "newpass"))
