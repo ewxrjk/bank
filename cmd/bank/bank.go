@@ -21,6 +21,7 @@ func main() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(userCmd)
 	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(configCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("bank: %s", err)
 	}

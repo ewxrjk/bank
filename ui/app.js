@@ -1,8 +1,3 @@
-// Configuration
-// TODO config shouldn't really be in the JS. Oh well, life is hard.
-
-var houseAccount = "house";
-
 // Login page
 
 // login issues the login request.
@@ -378,8 +373,8 @@ function updateAccounts() {
                 transactionsInit()
             }
             // If there is a house account it should be the default transaction origin
-            if (accounts.includes(houseAccount)) {
-                $("select#origin").val(houseAccount);
+            if (accounts.includes(config["houseAccount"])) {
+                $("select#origin").val(config["houseAccount"]);
             }
             revalidate();
         },
@@ -400,10 +395,21 @@ $(document).ready(function() {
     if(location.pathname == "/logout.html") {
         logout();
     }
-    // Populate accounts and users.
+    // Get configuration.
     if(location.pathname != "/login.html") {
-        updateAccounts();
+        $.ajax({
+            url:  "/v1/config/",
+            dataType: "json",
+            success: function(data) {
+                config = data;
+                // When done, update accounts.
+                updateAccounts();
+            },
+            error: ajaxFailed
+        });
         updateUsers();
+        // TODO this is rather inelegant. Really we want to dispatch all three concurrently
+        // and deal with the consequences when they have all turned up.
     }
     // Whenever any form is modified...
     $("form").each(function(i, f) {

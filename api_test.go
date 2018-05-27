@@ -134,5 +134,43 @@ func TestApiAccount(t *testing.T) {
 	assert.Equal(t, 2500, transactions[0].Amount)
 	assert.Equal(t, -500, transactions[0].OriginBalanceAfter)
 	assert.Equal(t, -1, transactions[0].DestinationBalanceAfter)
+}
+
+func TestApiConfig(t *testing.T) {
+	var err error
+	var b *Bank
+	os.Remove("_account.db")
+	b, err = NewBank("sqlite3", "_account.db")
+	require.NoError(t, err)
+	defer func() {
+		b.Close()
+		os.Remove("_account.db")
+	}()
+	require.NoError(t, b.NewBank())
+
+	// Defaults
+	var configs map[string]string
+	configs, err = b.GetConfigs()
+	require.NoError(t, err)
+	assert.Equal(t, "house", configs["houseAccount"])
+	assert.Equal(t, "Test Bank", configs["title"])
+
+	var value string
+	value, err = b.GetConfig("houseAccount")
+	require.NoError(t, err)
+	require.Equal(t, "house", value)
+
+	// Gaps
+	value, err = b.GetConfig("junk")
+	require.Equal(t, ErrNoConfig, err)
+
+	// Setting
+	require.NoError(t, b.PutConfig("houseAccount", "spong"))
+	value, err = b.GetConfig("houseAccount")
+	require.NoError(t, err)
+	require.Equal(t, "spong", value)
+	configs, err = b.GetConfigs()
+	require.NoError(t, err)
+	assert.Equal(t, "spong", configs["houseAccount"])
 
 }

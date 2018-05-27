@@ -67,6 +67,12 @@ func (b *Bank) NewBank() (err error) {
 		  )`); err != nil {
 			return
 		}
+		if _, err = tx.Exec(`CREATE TABLE config (
+			key TEXT PRIMARY KEY,
+			value TEXT
+		  )`); err != nil {
+			return
+		}
 		return
 	})
 	if err != nil {
@@ -287,6 +293,42 @@ func (b *Bank) Distribute(user string, origin string, destinations []string, des
 	})
 	if err != nil {
 		err = fmt.Errorf("creating distribution transaction: %v", err)
+	}
+	return
+}
+
+// GetConfig retrieves a configuration item.
+func (b *Bank) GetConfig(key string) (value string, err error) {
+	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
+		value, err = GetConfig(tx, key)
+		return
+	})
+	if err != nil && err != ErrNoConfig {
+		err = fmt.Errorf("getting configuration: %v", err)
+	}
+	return
+}
+
+// PutConfig sets a configuration item.
+func (b *Bank) PutConfig(key, value string) (err error) {
+	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
+		err = PutConfig(tx, key, value)
+		return
+	})
+	if err != nil {
+		err = fmt.Errorf("putting configuration: %v", err)
+	}
+	return
+}
+
+// GetConfigs retrieves all configuration items.
+func (b *Bank) GetConfigs() (configs map[string]string, err error) {
+	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
+		configs, err = GetConfigs(tx)
+		return
+	})
+	if err != nil {
+		err = fmt.Errorf("getting configuration: %v", err)
 	}
 	return
 }

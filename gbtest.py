@@ -29,6 +29,17 @@ try:
             pass
         break
 
+    # Config is RO before login
+    r = requests.get("http://%s/v1/config" % address)
+    assert r.status_code == 200
+    assert r.json()["houseAccount"] == "house"
+    assert r.json()["title"] == "Test Bank"
+    r = requests.get("http://%s/v1/config/title" % address)
+    assert r.status_code == 200
+    assert r.text == "Test Bank"
+    r = requests.put("http://%s/v1/config/title" % address, json={"Value": "whatever"})
+    assert r.status_code == 403
+
     # Login
     r=requests.post("http://%s/v1/login" % address, json={"User": "fred", "Password": "pass1"})
     assert r.status_code == 403
@@ -148,6 +159,13 @@ try:
     assert transactions[0]["Amount"] == 2500
     assert transactions[0]["OriginBalanceAfter"] == -500
     assert transactions[0]["DestinationBalanceAfter"] == -1
+
+    # Config
+    r = requests.put("http://%s/v1/config/title" % address, json={"Value": "gbtest.py", "Token": token}, cookies=cookies)
+    assert r.status_code == 200
+    r = requests.get("http://%s/v1/config/title" % address)
+    assert r.status_code == 200
+    assert r.text == "gbtest.py"
 
     # Logout
     r=requests.post("http://%s/v1/logout" % address, cookies=cookies)

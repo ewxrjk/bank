@@ -18,13 +18,12 @@ import (
 	"time"
 )
 
-var serverAddress, serverKey, serverCert, serviceName string
+var serverAddress, serverKey, serverCert string
 
 func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
-	serverCmd.PersistentFlags().StringVarP(&serviceName, "name", "n", "Bank", "service name")
 }
 
 var secure bool
@@ -65,6 +64,7 @@ var namespace = []handlerPath{
 	{"/v1/account/", handleAccount},
 	{"/v1/transaction/", handleTransaction},
 	{"/v1/distribute/", handleDistribute},
+	{"/v1/config/", handleConfig},
 	{"/", handleRoot},
 }
 
@@ -188,7 +188,7 @@ func respond(w http.ResponseWriter, jres interface{}) {
 	json.NewEncoder(w).Encode(&jres)
 }
 
-// NewUserRequest is the JSON requst to create a new user.
+// NewUserRequest is the JSON request to create a new user.
 type NewUserRequest struct {
 	User     string
 	Password string
@@ -437,6 +437,74 @@ func handleDistribute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ConfigRequest is the JSON request to set a configuration item.
+type ConfigRequest struct {
+	Value string
+	Token string
+}
+
+// GET /v1/config/
+// GET /v1/config/KEY
+// PUT /v1/config/KEY
+func handleConfig(w http.ResponseWriter, r *http.Request) {
+	var err error
+	key := r.URL.Path[len("/v1/config/"):]
+	if r.Method == "GET" {
+		// Configuration is not secret!
+		if key != "" {
+			var value string
+			if value, err = b.GetConfig(key); err != nil {
+				if err == bank.ErrNoConfig {
+					http.Error(w, err.Error(), http.StatusNotFound)
+				} else {
+					log.Printf("getting configs: %v", err)
+					http.Error(w, "internal error", http.StatusInternalServerError)
+				}
+				return
+			}
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(value))
+		} else {
+			var configs map[string]string
+			if configs, err = b.GetConfigs(); err != nil {
+				log.Printf("getting configs: %v", err)
+				http.Error(w, "internal error", http.StatusInternalServerError)
+				return
+			}
+			respond(w, configs)
+		}
+	} else if r.Method == "PUT" {
+		var session *Session
+		if session = mustSession(w, r); session == nil {
+			return
+		}
+		var jreq ConfigRequest
+		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		if jreq.Token != session.token {
+			log.Printf("token mismatch")
+			http.Error(w, "inconsistent session", http.StatusForbidden)
+			return
+		}
+		if key == "" {
+			http.Error(w, "missing key", http.StatusBadRequest)
+			return
+		}
+		if err = b.PutConfig(key, jreq.Value); err != nil {
+			log.Printf("putting config %v: %v", key, err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, "set configuration item", http.StatusOK)
+	} else {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 // embedTemplate is the map of paths to parsed templates.
 var embedTemplate = map[string]*template.Template{}
 
@@ -468,7 +536,11 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		writer := strings.Builder{}
 		data := TemplateData{
 			Token: "not logged in",
-			Title: serviceName,
+		}
+		if data.Title, err = b.GetConfig("title"); err != nil {
+			log.Printf("getting title%v", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 		if session := getSession(w, r); session != nil {
 			data.Token = session.token
