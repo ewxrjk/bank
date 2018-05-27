@@ -82,11 +82,13 @@ var sessionLock sync.Mutex
 
 const cookieName = "bank"
 
+// LoginRequest is the JSON request for a new login
 type LoginRequest struct {
 	User     string
 	Password string
 }
 
+// LoginResponse is  the JSON respons for a succesful login
 type LoginResponse struct {
 	Token string
 }
@@ -186,6 +188,7 @@ func respond(w http.ResponseWriter, jres interface{}) {
 	json.NewEncoder(w).Encode(&jres)
 }
 
+// NewUserRequest is the JSON requst to create a new user.
 type NewUserRequest struct {
 	User     string
 	Password string
@@ -244,6 +247,7 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ChangePasswordRequest is the JSON request to change a password.
 type ChangePasswordRequest struct {
 	User     string
 	Password string
@@ -283,6 +287,7 @@ func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "changed password", http.StatusOK)
 }
 
+// NewAccountRequest is the JSON request to create new account.
 type NewAccountRequest struct {
 	Account string
 	Token   string
@@ -335,6 +340,7 @@ func handleAccount(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// NewTransactionRequest is the JSON request to create a new transaction.
 type NewTransactionRequest struct {
 	Token       string
 	Origin      string
@@ -392,6 +398,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DistributeRequest is the JSON request to create distribution transactions.
 type DistributeRequest struct {
 	Token        string
 	Origin       string
@@ -430,6 +437,7 @@ func handleDistribute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// embedTemplate is the map of paths to parsed templates.
 var embedTemplate = map[string]*template.Template{}
 
 func init() {
@@ -440,6 +448,7 @@ func init() {
 	}
 }
 
+// TemplateData is the data object type for template execution.
 type TemplateData struct {
 	Token string
 	Title string
