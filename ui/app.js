@@ -131,31 +131,6 @@ function transactionToRow(transaction) {
     return tr;
 }
 
-// transactionsInit sets up the transactions table on page load
-function transactionsInit() {
-    // Populate the balance columns and account dropdowns
-    //
-    // This only happens at page load and therefore does not cope with
-    // the set of accounts changing during the page's lifetime.
-    // I'm going to leave this as it is; the effort to fix it isn't
-    // justified by the expected usage model.
-    var i, tr, select;
-    tr = $("table.transactions > thead > tr");
-    select = $("select.account,select.accounts");
-    for (i = 0; i < accounts.length; i++) {
-        tr.append($("<th>").addClass("balance").text(accounts[i]));
-        select.append($("<option>").text(accounts[i]));
-    }
-    // Populate the transactions table
-    transactionsMore();
-    // Refresh the transactions table regularly.
-    // This has the effect of auto-bouncing you to /login.html when things go wrong.
-    // This isn't completely terrible (the login page will take you back to where
-    // you were) but it's not very pretty. I'll leave it for now.
-    setInterval(transactionsRefresh, 10000);
-    $("#more").on("click", transactionsMore);
-}
-
 // New transactions page
 
 // newTransaction issues a transaction creation request.
@@ -294,6 +269,15 @@ var amountRegexp = /^[0-9]+(\.[0-9]{2})?$/;
 // validate validates form entries and adjusts the submit button.
 function validate(container) {
     var valid;
+    // Adjust the cooked transaction form.
+    if ($("select#reason").val() == "house") {
+        $("#originRow").hide();
+        $("#origin").val(config["houseAccount"]); // TODO assumed to exist
+        $("#origin").removeClass("human");
+    } else {
+        $("#originRow").show();
+        $("#origin").addClass("human");
+    }
     valid = true;
     container.find('td.error').text('');
     container.find('input,select').each(function (i, e) {
@@ -330,6 +314,10 @@ function validate(container) {
                     trouble = "must not include origin (" + $("#origin").val() + ")";
                     valid = false;
                 }
+            }
+            if (valid && e.hasClass('human') && e.val() == config["houseAccount"]) {
+                trouble = "must not be house account";
+                valid = false;
             }
             if (valid && e.hasClass('newpassword')) {
                 newpasswords = []
@@ -382,16 +370,43 @@ function initialize() {
         dataType: "json",
     });
     $.when(u, a, c).done(function (ur, ar, cr) {
+        var i, tr, select;
         users = ur[0];
         accounts = ar[0]
         config = cr[0];
         // Initialize the transactions table if present
         if ($("table.transactions").length > 0) {
-            transactionsInit()
+            // Populate the balance columns
+            //
+            // This only happens at page load and therefore does not cope with
+            // the set of accounts changing during the page's lifetime.
+            // I'm going to leave this as it is; the effort to fix it isn't
+            // justified by the expected usage model.
+            tr = $("table.transactions > thead > tr");
+            for (i = 0; i < accounts.length; i++) {
+                tr.append($("<th>").addClass("balance").text(accounts[i]));
+            }
+            // Populate the transactions table
+            transactionsMore();
+            // Refresh the transactions table regularly.
+            // This has the effect of auto-bouncing you to /login.html when things go wrong.
+            // This isn't completely terrible (the login page will take you back to where
+            // you were) but it's not very pretty. I'll leave it for now.
+            setInterval(transactionsRefresh, 10000);
+            $("#more").on("click", transactionsMore);
+        }
+        // Populate the account dropdowns
+        select = $("select.account,select.accounts");
+        for (i = 0; i < accounts.length; i++) {
+            select.append($("<option>").text(accounts[i]));
         }
         // If there is a house account it should be the default transaction origin
+        // for generic transactions; but we don't do this for the cooked transaction
+        // form.
         if (accounts.includes(config["houseAccount"])) {
-            $("select#origin").val(config["houseAccount"]);
+            if (!$("select#origin").hasClass("human")) {
+                $("select#origin").val(config["houseAccount"]);
+            }
         }
         initializeValidation();
     }).fail(ajaxFailed);
@@ -414,6 +429,7 @@ function initializeValidation() {
     // Attach requests to form submission
     $("form#login").on("submit", login);
     $("form#newTransaction").on("submit", transactionsNew);
+    $("form#cookedTransaction").on("submit", transactionsNew);
     $("form#distribute").on("submit", distribute);
     $("form#newuser").on("submit", newUser);
     $("form#newaccount").on("submit", newAccount);
