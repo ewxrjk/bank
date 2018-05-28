@@ -453,8 +453,11 @@ type ConfigRequest struct {
 func handleConfig(w http.ResponseWriter, r *http.Request) {
 	var err error
 	key := r.URL.Path[len("/v1/config/"):]
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
 	if r.Method == "GET" {
-		// Configuration is not secret!
 		if key != "" {
 			var value string
 			if value, err = b.GetConfig(key); err != nil {
@@ -478,10 +481,6 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 			respond(w, configs)
 		}
 	} else if r.Method == "PUT" {
-		var session *Session
-		if session = mustSession(w, r); session == nil {
-			return
-		}
 		var jreq ConfigRequest
 		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)

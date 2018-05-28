@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-import requests,os,subprocess,time,socket
+import requests
+import os
+import subprocess
+import time
+import socket
 
 try:
     os.remove("_test.db")
@@ -10,123 +14,147 @@ except FileNotFoundError:
 subprocess.check_call(["./gobank", "-d", "_test.db", "init"])
 
 # Create a user
-subprocess.check_call(["./gobank", "-d", "_test.db", "user", "add", "-p", "pass1", "fred"])
+subprocess.check_call(["./gobank", "-d", "_test.db",
+                       "user", "add", "-p", "pass1", "fred"])
 
 # Change password
-subprocess.check_call(["./gobank", "-d", "_test.db", "user", "pw", "-p", "pass2", "fred"])
+subprocess.check_call(["./gobank", "-d", "_test.db",
+                       "user", "pw", "-p", "pass2", "fred"])
 
-host="localhost"
-port=9823
-address="%s:%d" % (host, port)
-server=subprocess.Popen(["./gobank", "-d", "_test.db", "server", "-a", address])
+host = "localhost"
+port = 9823
+address = "%s:%d" % (host, port)
+server = subprocess.Popen(
+    ["./gobank", "-d", "_test.db", "server", "-a", address])
 try:
     # Wait for server
     while True:
         try:
-            s=socket.create_connection((host,port))
+            s = socket.create_connection((host, port))
         except ConnectionRefusedError:
             time.sleep(0.1)
             pass
         break
 
-    # Config is RO before login
-    r = requests.get("http://%s/v1/config" % address)
-    assert r.status_code == 200
-    assert r.json()["houseAccount"] == "house"
-    assert r.json()["title"] == "Test Bank"
-    r = requests.get("http://%s/v1/config/title" % address)
-    assert r.status_code == 200
-    assert r.text == "Test Bank"
-    r = requests.put("http://%s/v1/config/title" % address, json={"Value": "whatever"})
-    assert r.status_code == 403
-
     # Login
-    r=requests.post("http://%s/v1/login" % address, json={"User": "fred", "Password": "pass1"})
+    r = requests.post("http://%s/v1/login" %
+                      address, json={"User": "fred", "Password": "pass1"})
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/login" % address, json={"User": "fred", "Password": "pass2"})
+    r = requests.post("http://%s/v1/login" %
+                      address, json={"User": "fred", "Password": "pass2"})
     r.raise_for_status()
-    cookies=r.cookies
-    token=r.json()["Token"]
+    cookies = r.cookies
+    token = r.json()["Token"]
 
     # Users
-    r=requests.get("http://%s/v1/user/" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/user/" % address, cookies=cookies)
     r.raise_for_status()
-    assert r.json()==['fred']
-    r=requests.post("http://%s/v1/user/" % address, json={"User": "bob", "Password": "pass3", "Token": token}, cookies=cookies)
+    assert r.json() == ['fred']
+    r = requests.post("http://%s/v1/user/" % address,
+                      json={"User": "bob", "Password": "pass3", "Token": token}, cookies=cookies)
     r.raise_for_status()
-    r=requests.get("http://%s/v1/user/" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/user/" % address, cookies=cookies)
     r.raise_for_status()
-    assert r.json()==['bob', 'fred']
+    assert r.json() == ['bob', 'fred']
 
     # Enforce login credentials
-    r=requests.get("http://%s/v1/account/" % address)
+    r = requests.get("http://%s/v1/account/" % address)
     assert r.status_code == 403
-    r=requests.get("http://%s/v1/account/" % address, cookies={'bank': 'whatever'})
+    r = requests.get("http://%s/v1/account/" %
+                     address, cookies={'bank': 'whatever'})
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/account/" % address, json={"Account": "fred", "Token": "whatever"}, cookies=cookies)
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "fred", "Token": "whatever"}, cookies=cookies)
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/account/" % address, json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
     assert r.status_code == 403
-    r=requests.get("http://%s/v1/user/" % address)
+    r = requests.get("http://%s/v1/user/" % address)
     assert r.status_code == 403
-    r=requests.get("http://%s/v1/user/" % address, cookies={'bank': 'whatever'})
+    r = requests.get("http://%s/v1/user/" %
+                     address, cookies={'bank': 'whatever'})
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/user/" % address, json={"Account": "fred", "Token": "whatever"}, cookies=cookies)
+    r = requests.post("http://%s/v1/user/" % address,
+                      json={"Account": "fred", "Token": "whatever"}, cookies=cookies)
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/user/" % address, json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
+    r = requests.post("http://%s/v1/user/" % address,
+                      json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/transaction/" % address,
-                    json={"Origin": "house", "Destination": "fred", "Description": "buy a bus", "Amount": 2000, "Token": 'whatever'},
-                    cookies=cookies)
+    r = requests.post("http://%s/v1/transaction/" % address,
+                      json={"Origin": "house", "Destination": "fred",
+                            "Description": "buy a bus", "Amount": 2000, "Token": 'whatever'},
+                      cookies=cookies)
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/transaction/" % address,
-                    json={"Origin": "house", "Destination": "fred", "Description": "buy a bus", "Amount": 2000, "Token": token},
-                    cookies={'bank': 'whatever'})
+    r = requests.post("http://%s/v1/transaction/" % address,
+                      json={"Origin": "house", "Destination": "fred",
+                            "Description": "buy a bus", "Amount": 2000, "Token": token},
+                      cookies={'bank': 'whatever'})
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/distribute/" % address,
-                    json={"Origin": "house", "Destinations": ["bob","fred"], "Description": "distribution", "Token": 'whatever'},
-                    cookies=cookies)
+    r = requests.post("http://%s/v1/distribute/" % address,
+                      json={"Origin": "house", "Destinations": [
+                          "bob", "fred"], "Description": "distribution", "Token": 'whatever'},
+                      cookies=cookies)
     assert r.status_code == 403
-    r=requests.post("http://%s/v1/distribute/" % address,
-                    json={"Origin": "house", "Destinations": ["bob","fred"], "Description": "distribution", "Token": token},
-                    cookies={'bank': 'whatever'})
+    r = requests.post("http://%s/v1/distribute/" % address,
+                      json={"Origin": "house", "Destinations": [
+                          "bob", "fred"], "Description": "distribution", "Token": token},
+                      cookies={'bank': 'whatever'})
     assert r.status_code == 403
+    r = requests.get("http://%s/v1/config" % address)
+    assert r.status_code == 403
+    r = requests.get("http://%s/v1/config/title" % address)
+    assert r.status_code == 403
+    r = requests.put("http://%s/v1/config/" % address,
+                     json={"Value": "gbtest.py", "Token": 'whatever'},
+                     cookies=cookies)
+    assert r.status_code == 403
+    r = requests.put("http://%s/v1/config/" % address,
+                     json={"Value": "gbtest.py", "Token": token},
+                     cookies={'bank': 'whatever'})
 
     # Accounts
-    r=requests.get("http://%s/v1/account/" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/account/" % address, cookies=cookies)
     r.raise_for_status()
-    assert r.json()==[]
-    r=requests.post("http://%s/v1/account/" % address, json={"Account": "fred", "Token": token}, cookies=cookies)
+    assert r.json() == []
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "fred", "Token": token}, cookies=cookies)
     r.raise_for_status()
-    r=requests.post("http://%s/v1/account/" % address, json={"Account": "bob", "Token": token}, cookies=cookies)
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "bob", "Token": token}, cookies=cookies)
     r.raise_for_status()
-    r=requests.post("http://%s/v1/account/" % address, json={"Account": "house", "Token": token}, cookies=cookies)
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "house", "Token": token}, cookies=cookies)
     r.raise_for_status()
-    r=requests.get("http://%s/v1/account/" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/account/" % address, cookies=cookies)
     r.raise_for_status()
-    accounts=r.json()
-    assert accounts==["bob", "fred", "house"]
+    accounts = r.json()
+    assert accounts == ["bob", "fred", "house"]
 
     # Transactions
-    r=requests.get("http://%s/v1/transaction/?offset=0&limit=10" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/transaction/?offset=0&limit=10" %
+                     address, cookies=cookies)
     r.raise_for_status()
-    assert r.json()==[]
-    r=requests.post("http://%s/v1/transaction/" % address,
-                    json={"Origin": "house", "Destination": "fred", "Description": "buy a bus", "Amount": 2000, "Token": token},
-                    cookies=cookies)
+    assert r.json() == []
+    r = requests.post("http://%s/v1/transaction/" % address,
+                      json={"Origin": "house", "Destination": "fred",
+                            "Description": "buy a bus", "Amount": 2000, "Token": token},
+                      cookies=cookies)
     r.raise_for_status()
-    r=requests.post("http://%s/v1/transaction/" % address,
-                    json={"Origin": "house", "Destination": "bob", "Description": "buy a car", "Amount": 3001, "Token": token},
-                    cookies=cookies)
+    r = requests.post("http://%s/v1/transaction/" % address,
+                      json={"Origin": "house", "Destination": "bob",
+                            "Description": "buy a car", "Amount": 3001, "Token": token},
+                      cookies=cookies)
     r.raise_for_status()
-    r=requests.post("http://%s/v1/distribute/" % address,
-                    json={"Origin": "house", "Destinations": ["bob","fred"], "Description": "distribution", "Token": token},
-                    cookies=cookies)
+    r = requests.post("http://%s/v1/distribute/" % address,
+                      json={"Origin": "house", "Destinations": [
+                          "bob", "fred"], "Description": "distribution", "Token": token},
+                      cookies=cookies)
     r.raise_for_status()
-    r=requests.get("http://%s/v1/transaction/?offset=0&limit=10" % address, cookies=cookies)
+    r = requests.get("http://%s/v1/transaction/?offset=0&limit=10" %
+                     address, cookies=cookies)
     r.raise_for_status()
-    transactions=r.json()
-    assert len(transactions)==4
+    transactions = r.json()
+    assert len(transactions) == 4
     assert transactions[3]["ID"] == 1
     assert transactions[3]["User"] == "fred"
     assert transactions[3]["Origin"] == "house"
@@ -161,16 +189,20 @@ try:
     assert transactions[0]["DestinationBalanceAfter"] == -1
 
     # Config
-    r = requests.put("http://%s/v1/config/title" % address, json={"Value": "gbtest.py", "Token": token}, cookies=cookies)
+    r = requests.get("http://%s/v1/config/title" % address, cookies=cookies)
     assert r.status_code == 200
-    r = requests.get("http://%s/v1/config/title" % address)
+    assert r.text == "Test Bank"
+    r = requests.put("http://%s/v1/config/title" % address,
+                     json={"Value": "gbtest.py", "Token": token}, cookies=cookies)
+    assert r.status_code == 200
+    r = requests.get("http://%s/v1/config/title" % address, cookies=cookies)
     assert r.status_code == 200
     assert r.text == "gbtest.py"
 
     # Logout
-    r=requests.post("http://%s/v1/logout" % address, cookies=cookies)
+    r = requests.post("http://%s/v1/logout" % address, cookies=cookies)
     assert r.status_code == 200
-    r=requests.get("http://%s/v1/account/" % address)
+    r = requests.get("http://%s/v1/account/" % address)
     assert r.status_code == 403
 
 finally:
