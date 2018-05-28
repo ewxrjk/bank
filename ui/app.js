@@ -9,13 +9,13 @@ function login() {
             User: $("#user").val(),
             Password: $("#password").val(),
         }),
-        url:  "/v1/login",
+        url: "/v1/login",
         contentType: "application/json",
         dataType: "json",
-        success: function(status, data, jqxhr) {
-            window.location.href="/"; // TODO should go back to previous page
+        success: function (status, data, jqxhr) {
+            window.location.href = "/"; // TODO should go back to previous page
         },
-        error: function(jqxhr, error, exception) {
+        error: function (jqxhr, error, exception) {
             $("#error").text(jqxhr.responseText);
         },
     });
@@ -28,10 +28,10 @@ function login() {
 function logout() {
     $.ajax({
         method: "POST",
-        url:  "/v1/logout",
+        url: "/v1/logout",
         contentType: "application/json",
-        success: function() {
-            window.location.href="/login.html";
+        success: function () {
+            window.location.href = "/login.html";
         },
         error: ajaxFailed,
     });
@@ -44,7 +44,7 @@ function logout() {
 // getTransactions extends the transactions table with older transactions
 function transactionsMore() {
     $.ajax({
-        url:  "/v1/transaction?" + $.param({
+        url: "/v1/transaction?" + $.param({
             limit: 20,
             offset: $('table.transactions>tbody>tr').length
         }),
@@ -59,11 +59,11 @@ function transactionsMore() {
 function transactionsAddMore(data) {
     var i;
     // Hide 'more' button if there's nothing to get
-    if(data.length == 0) {
+    if (data.length == 0) {
         $("#more").hide()
         return
     }
-    for(i = 0; i < data.length; i++) {
+    for (i = 0; i < data.length; i++) {
         $("table.transactions > tbody").append(transactionToRow(data[i]));
     }
 }
@@ -72,14 +72,14 @@ function transactionsAddMore(data) {
 function transactionsRefresh() {
     var td, id
     // Find the earliest transaction we know of
-    td=$("table.transactions > tbody td.id")
+    td = $("table.transactions > tbody td.id")
     if (td.length == 0) {
         transactionsMore()
         return
     }
-    id=Number(td[0].innerText)
+    id = Number(td[0].innerText)
     $.ajax({
-        url:  "/v1/transaction?" + $.param({after: id}),
+        url: "/v1/transaction?" + $.param({ after: id }),
         dataType: "json",
         success: transactionsAddNew,
         error: ajaxFailed,
@@ -90,7 +90,7 @@ function transactionsRefresh() {
 // addNewTransactions adds a list of transactions to the start of the transactions table
 function transactionsAddNew(data) {
     var i;
-    for(i = data.length-1; i >= 0; i--) {
+    for (i = data.length - 1; i >= 0; i--) {
         $("table.transactions > tbody").prepend(transactionToRow(data[i]));
     }
 }
@@ -98,29 +98,29 @@ function transactionsAddNew(data) {
 // transactionToRow returns a <tr> element for a transaction.
 function transactionToRow(transaction) {
     var tr, td, time, j
-    tr=$("<tr>");
-    time=new Date(transaction["Time"]*1000)
-    time=(time.getUTCFullYear() + "-" + pad(time.getUTCMonth(), 2) +"-" + pad(time.getUTCDate(), 2)
-          + " " + pad(time.getUTCHours(), 2) + ":" + pad(time.getUTCMinutes(), 2) + ":" + pad(time.getUTCSeconds(), 2))
-    td=$("<td>").addClass("time").text(time);
+    tr = $("<tr>");
+    time = new Date(transaction["Time"] * 1000)
+    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth(), 2) + "-" + pad(time.getUTCDate(), 2)
+        + " " + pad(time.getUTCHours(), 2) + ":" + pad(time.getUTCMinutes(), 2) + ":" + pad(time.getUTCSeconds(), 2))
+    td = $("<td>").addClass("time").text(time);
     tr.append(td)
-    td=$("<td>").addClass("id").text(transaction["ID"]);
+    td = $("<td>").addClass("id").text(transaction["ID"]);
     tr.append(td)
-    td=$("<td>").addClass("user").text(transaction["User"])
+    td = $("<td>").addClass("user").text(transaction["User"])
     tr.append(td)
-    td=$("<td>").addClass("description").text(transaction["Description"])
+    td = $("<td>").addClass("description").text(transaction["Description"])
     tr.append(td)
-    td=$("<td>").addClass("payment_amount").text((transaction["Amount"] / 100).toFixed(2))
+    td = $("<td>").addClass("payment_amount").text((transaction["Amount"] / 100).toFixed(2))
     tr.append(td)
-    td=$("<td>").addClass("account").text(transaction["Origin"])
+    td = $("<td>").addClass("account").text(transaction["Origin"])
     tr.append(td)
-    td=$("<td>").addClass("account").text(transaction["Destination"])
-     tr.append(td)
-    for(j = 0; j < accounts.length; j++) {
-        td=$("<td>").addClass("balance_amount");
-        if(accounts[j] == transaction["Origin"]) {
+    td = $("<td>").addClass("account").text(transaction["Destination"])
+    tr.append(td)
+    for (j = 0; j < accounts.length; j++) {
+        td = $("<td>").addClass("balance_amount");
+        if (accounts[j] == transaction["Origin"]) {
             td.text((transaction["OriginBalanceAfter"] / 100).toFixed(2))
-        } else if(accounts[j] == transaction["Destination"]) {
+        } else if (accounts[j] == transaction["Destination"]) {
             td.text((transaction["DestinationBalanceAfter"] / 100).toFixed(2));
         }
         tr.append(td);
@@ -158,11 +158,11 @@ function transactionsNew() {
             Origin: $("#origin").val(),
             Destination: $("#destination").val(),
             Description: $("#description").val(),
-            Amount: Number($("#amount").val())*100,
+            Amount: Number($("#amount").val()) * 100,
         }),
-        url:  "/v1/transaction/",
+        url: "/v1/transaction/",
         contentType: "application/json",
-        success: function() {
+        success: function () {
             transactionsRefresh();
             $("#success").text("transaction created");
         },
@@ -183,9 +183,9 @@ function distribute() {
             Destinations: $("#destinations").val(),
             Description: $("#description").val(),
         }),
-        url:  "/v1/distribute/",
+        url: "/v1/distribute/",
         contentType: "application/json",
-        success: function() {
+        success: function () {
             transactionsRefresh();
             $("#success").text("transaction created");
         },
@@ -207,9 +207,9 @@ function newUser() {
             User: $("#user").val(),
             Password: $("#password").val(),
         }),
-        url:  "/v1/user/",
+        url: "/v1/user/",
         contentType: "application/json",
-        success: function() {
+        success: function () {
             $("#success").text("user " + user + " created");
             updateUsers();
             // Clear the form. This seems a bit ugly but it doesn't make sense
@@ -237,9 +237,9 @@ function newAccount() {
             Token: $("#token").val(),
             Account: account,
         }),
-        url:  "/v1/account/",
+        url: "/v1/account/",
         contentType: "application/json",
-        success: function() {
+        success: function () {
             $("#success").text("account " + account + " created");
             updateAccounts();
             // Clear the form. See discussion in newUser.
@@ -261,9 +261,9 @@ function changePassword() {
             Token: $("#token").val(),
             Password: $("#password").val(),
         }),
-        url:  "/v1/user/password",
+        url: "/v1/user/password",
         contentType: "application/json",
-        success: function() {
+        success: function () {
             $("#success").text("password changed");
         },
         error: ajaxFailed,
@@ -284,9 +284,9 @@ var amountRegexp = /^[0-9]+(\.[0-9]{2})?$/;
 // validate validates form entries and adjusts the submit button.
 function validate(container) {
     var valid;
-    valid=true;
+    valid = true;
     container.find('td.error').text('');
-    container.find('input,select').each(function(i, e) {
+    container.find('input,select').each(function (i, e) {
         var j, newpasswords, trouble;
         if (valid) {
             e = $(e)
@@ -340,8 +340,8 @@ function validate(container) {
 
 // ajaxFailed is called when a non-authentication error occurs
 function ajaxFailed(jqxhr, error, exception) {
-    if(jqxhr.status==403) { // If logged out, bounce back to login page
-        window.location.href="/login.html";
+    if (jqxhr.status == 403) { // If logged out, bounce back to login page
+        window.location.href = "/login.html";
         return
     }
     $("#error").text(jqxhr.responseText);
@@ -349,70 +349,47 @@ function ajaxFailed(jqxhr, error, exception) {
 
 // Initialization
 
-function updateUsers() {
-    $.ajax({
-        url:  "/v1/user/",
+// initialize gets configuration and sets up everything that needs it.
+function initialize() {
+    var u, a, c;
+    // Disable all form submission until ready
+    $(".submit").prop("disabled", true);
+    // Get configuration &c concurrently
+    u = $.ajax({
+        url: "/v1/user/",
         dataType: "json",
-        success: function(data) {
-            users = data;
-            revalidate();
-        },
-        error: ajaxFailed,
     });
-}
-
-function updateAccounts() {
-    $.ajax({
-        url:  "/v1/account/",
+    a = $.ajax({
+        url: "/v1/account/",
         dataType: "json",
-        success: function(data) {
-            accounts = data;
-            // Initialize the transactions table if present
-            if($("table.transactions").length > 0) {
-                transactionsInit()
-            }
-            // If there is a house account it should be the default transaction origin
-            if (accounts.includes(config["houseAccount"])) {
-                $("select#origin").val(config["houseAccount"]);
-            }
-            revalidate();
-        },
-        error: ajaxFailed,
     });
+    c = $.ajax({
+        url: "/v1/config/",
+        dataType: "json",
+    });
+    $.when(u, a, c).done(function (ur, ar, cr) {
+        users = ur[0];
+        accounts = ar[0]
+        config = cr[0];
+        // Initialize the transactions table if present
+        if ($("table.transactions").length > 0) {
+            transactionsInit()
+        }
+        // If there is a house account it should be the default transaction origin
+        if (accounts.includes(config["houseAccount"])) {
+            $("select#origin").val(config["houseAccount"]);
+        }
+        initializeValidation();
+    }).fail(ajaxFailed);
 }
 
-// revalidate revalidates all forms in the light of new information
-function revalidate() {
-    // Validate any forms that may be present
-    $("form").each(function(i, f) {
-        validate($(f));
-    });
-}
-
-$(document).ready(function() {
-    // Logout is special.
-    if(location.pathname == "/logout.html") {
-        logout();
-    }
-    // Get configuration.
-    if(location.pathname != "/login.html") {
-        $.ajax({
-            url:  "/v1/config/",
-            dataType: "json",
-            success: function(data) {
-                config = data;
-                // When done, update accounts.
-                updateAccounts();
-            },
-            error: ajaxFailed
-        });
-        updateUsers();
-        // TODO this is rather inelegant. Really we want to dispatch all three concurrently
-        // and deal with the consequences when they have all turned up.
-    }
+// initializeValidation sets up form validation logic
+// and does the initial validation of the (mostly empty)
+// forms.
+function initializeValidation() {
     // Whenever any form is modified...
-    $("form").each(function(i, f) {
-        $(f).find("input,select").on("input", function() {
+    $("form").each(function (i, f) {
+        $(f).find("input,select").on("input", function () {
             // ...clear the error & success indicators
             $("#error").text("");
             $("#success").text("");
@@ -427,5 +404,21 @@ $(document).ready(function() {
     $("form#newuser").on("submit", newUser);
     $("form#newaccount").on("submit", newAccount);
     $("form#changepass").on("submit", changePassword);
+    // Initial validation of forms
+    $("form").each(function (i, f) {
+        validate($(f));
+    });
+}
+
+$(document).ready(function () {
+    // Login and logout are special.
+    if (location.pathname == "/logout.html") {
+        logout();
+    } else if (location.pathname == "/login.html") {
+        initializeValidation();
+    } else {
+        initialize();
+    }
+    // Logout is ready immediately.
     $("a#logout").on("click", logout);
 });
