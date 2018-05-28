@@ -520,6 +520,7 @@ func init() {
 type TemplateData struct {
 	Token string
 	Title string
+	User  string
 }
 
 // GET /
@@ -544,6 +545,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		}
 		if session := getSession(w, r); session != nil {
 			data.Token = session.token
+			data.User = session.user
 		} else {
 			log.Printf("found no session")
 		}

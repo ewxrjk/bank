@@ -2,7 +2,6 @@
 
 // login issues the login request.
 function login() {
-    // TODO https://www.chromium.org/developers/design-documents/create-amazing-password-forms for advice
     $.ajax({
         method: "POST",
         data: JSON.stringify({
@@ -264,6 +263,7 @@ function changePassword() {
         data: JSON.stringify({
             Token: $("#token").val(),
             Password: $("#password").val(),
+            User: $("#user").val(),
         }),
         url: "/v1/user/password",
         contentType: "application/json",
