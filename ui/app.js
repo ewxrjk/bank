@@ -30,7 +30,6 @@ function logout() {
         method: "POST",
         url:  "/v1/logout",
         contentType: "application/json",
-        dataType: "json",
         success: function() {
             window.location.href="/login.html";
         },
@@ -428,4 +427,5 @@ $(document).ready(function() {
     $("form#newuser").on("submit", newUser);
     $("form#newaccount").on("submit", newAccount);
     $("form#changepass").on("submit", changePassword);
+    $("a#logout").on("click", logout);
 });
