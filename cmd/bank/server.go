@@ -197,7 +197,7 @@ func respond(w http.ResponseWriter, jres interface{}) {
 	json.NewEncoder(w).Encode(&jres)
 }
 
-// errorResponse issues an error response approriate to err.
+// errorResponse issues an error response appropriate to err.
 func errorResponse(w http.ResponseWriter, err error, action string) {
 	switch err {
 	case bank.ErrNoSuchUser, bank.ErrNoSuchConfig, bank.ErrNoSuchAccount,
