@@ -18,18 +18,18 @@ To create an empty database,
 supposing that it is called `bank.db`
 and located in the current directory:
 
-    $ gobank -d bank.db init
+    $ bank -d bank.db init
 
 You will need to create an initial user:
 
-    $ gobank -d bank.db user add rjk 
+    $ bank -d bank.db user add rjk 
     Enter password: 
     Confirm password: 
 
 You can create additional users at this stage,
 or via the web interface.
 
-Passwords may subsequently be changed either with `gobank user pw` or via the web interface.
+Passwords may subsequently be changed either with `bank user pw` or via the web interface.
 
 ## Server Setup
 

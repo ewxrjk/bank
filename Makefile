@@ -3,34 +3,21 @@ wwwdir=/var/www/bank
 testwwwdir=/var/www/testbank
 INSTALL=install
 
-all: bank.real bank.site.real
+all: check
 
-gobank: $(wildcard *.go) $(wildcard cmd/bank/*.go) cmd/bank/ui.go
+bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) cmd/bank/ui.go
 	go build -o $@ ./cmd/bank
 
 embed: $(wildcard cmd/embed/*.go)
 	go build -o $@ ./cmd/embed
 
-gocheck: gobank
+check: bank
 	go test -v ./...
 	./gbtest.py
 
 EMBED=$(wildcard ui/*.html) ui/app.js ui/app.css
 cmd/bank/ui.go: ${EMBED} Makefile embed
 	./embed -o $@ -p main ${EMBED}
-
-bank.real: bank
-	rm -f bank.real
-	sed < bank > bank.real s/testbank/bank/g;
-	chmod 555 bank.real
-
-bank.site.real: bank.site
-	rm -f bank.site.real
-	sed < bank.site > bank.site.real s/testbank/bank/g;
-	chmod 444 bank.site.real
-
-check:
-	perl -wc bank
 
 install-real: check
 	adduser --system --group --home $(bankdir) bank
@@ -63,7 +50,4 @@ setup-test: check
 	chmod 600 $(bankdir)/testbank.db
 
 clean:
-	rm -f bank.real
-	rm -f bank.site.real
-
-# TODO logfile rotation
+	rm -f bank embed

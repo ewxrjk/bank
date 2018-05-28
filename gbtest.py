@@ -11,21 +11,21 @@ except FileNotFoundError:
     pass
 
 # Initialize database
-subprocess.check_call(["./gobank", "-d", "_test.db", "init"])
+subprocess.check_call(["./bank", "-d", "_test.db", "init"])
 
 # Create a user
-subprocess.check_call(["./gobank", "-d", "_test.db",
+subprocess.check_call(["./bank", "-d", "_test.db",
                        "user", "add", "-p", "pass1", "fred"])
 
 # Change password
-subprocess.check_call(["./gobank", "-d", "_test.db",
+subprocess.check_call(["./bank", "-d", "_test.db",
                        "user", "pw", "-p", "pass2", "fred"])
 
 host = "localhost"
 port = 9823
 address = "%s:%d" % (host, port)
 server = subprocess.Popen(
-    ["./gobank", "-d", "_test.db", "server", "-a", address])
+    ["./bank", "-d", "_test.db", "server", "-a", address])
 try:
     # Wait for server
     while True:
