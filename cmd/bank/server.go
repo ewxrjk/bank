@@ -150,6 +150,15 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	delete(sessions, c.Value)
+	expires := time.Now().Add(-24 * 365 * time.Hour)
+	http.SetCookie(w, &http.Cookie{
+		Name:     cookieName,
+		Value:    "logged out",
+		Path:     "/",
+		Expires:  expires,
+		HttpOnly: true,
+		Secure:   secure,
+	})
 	http.Error(w, "logged out", http.StatusOK)
 }
 
@@ -546,8 +555,6 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		if session := getSession(w, r); session != nil {
 			data.Token = session.token
 			data.User = session.user
-		} else {
-			log.Printf("found no session")
 		}
 		if err = template.Execute(&writer, data); err != nil {
 			log.Printf("executing template %s: %v", path, err)
