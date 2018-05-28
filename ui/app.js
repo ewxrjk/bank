@@ -274,7 +274,7 @@ function validate(container) {
         $("#originRow").hide();
         $("#origin").val(config["houseAccount"]); // TODO assumed to exist
         $("#origin").removeClass("human");
-    } else {
+    } else if ($("select#reason").val() == "payback") {
         $("#originRow").show();
         $("#origin").addClass("human");
     }

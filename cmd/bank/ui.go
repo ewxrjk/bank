@@ -861,7 +861,7 @@ const appjs = ("// Login page\n" +
 	"        $(\"#origin\").val(config[\"houseAccount\"]); // TODO as" +
 	"sumed to exist\n" +
 	"        $(\"#origin\").removeClass(\"human\");\n" +
-	"    } else {\n" +
+	"    } else if ($(\"select#reason\").val() == \"payback\") {\n" +
 	"        $(\"#originRow\").show();\n" +
 	"        $(\"#origin\").addClass(\"human\");\n" +
 	"    }\n" +
