@@ -13,7 +13,11 @@ function login() {
         contentType: "application/json",
         dataType: "json",
         success: function (status, data, jqxhr) {
-            window.location.href = "/"; // TODO should go back to previous page
+            if (window.location.search == "") {
+                window.location.href = "/";
+            } else {
+                window.location.href = window.location.search.substring(1);
+            }
         },
         error: function (jqxhr, error, exception) {
             $("#error").text(jqxhr.responseText);
@@ -24,7 +28,7 @@ function login() {
 
 // Logout page
 
-// login issues the login request.
+// logout issues the logout request.
 function logout() {
     $.ajax({
         method: "POST",
@@ -341,7 +345,11 @@ function validate(container) {
 // ajaxFailed is called when a non-authentication error occurs
 function ajaxFailed(jqxhr, error, exception) {
     if (jqxhr.status == 403) { // If logged out, bounce back to login page
-        window.location.href = "/login.html";
+        if (window.location.pathname != "/") {
+            window.location.href = "/login.html?" + window.location.pathname;
+        } else {
+            window.location.href = "/login.html";
+        }
         return
     }
     $("#error").text(jqxhr.responseText);
@@ -412,9 +420,9 @@ function initializeValidation() {
 
 $(document).ready(function () {
     // Login and logout are special.
-    if (location.pathname == "/logout.html") {
+    if (window.location.pathname == "/logout.html") {
         logout();
-    } else if (location.pathname == "/login.html") {
+    } else if (window.location.pathname == "/login.html") {
         initializeValidation();
     } else {
         initialize();
