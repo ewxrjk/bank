@@ -197,6 +197,19 @@ func respond(w http.ResponseWriter, jres interface{}) {
 	json.NewEncoder(w).Encode(&jres)
 }
 
+// errorResponse issues an error response approriate to err.
+func errorResponse(w http.ResponseWriter, err error, action string) {
+	switch err {
+	case bank.ErrNoSuchUser, bank.ErrNoSuchConfig, bank.ErrNoSuchAccount,
+		bank.ErrUserExists, bank.ErrAccountExists,
+		bank.ErrInsufficientFunds, bank.ErrUnsuitableParties:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	default:
+		log.Printf("%s: %v", action, err)
+		http.Error(w, action, http.StatusInternalServerError)
+	}
+}
+
 // NewUserRequest is the JSON request to create a new user.
 type NewUserRequest struct {
 	User     string
@@ -233,20 +246,14 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.NewUser(jreq.User, jreq.Password); err != nil {
-			if err == bank.ErrUserExists {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-			} else {
-				log.Printf("NewUser for %v: %v", jreq.User, err)
-				http.Error(w, "internal error", http.StatusInternalServerError)
-			}
+			errorResponse(w, err, "cannot create user")
 			return
 		}
 		http.Error(w, "created user", http.StatusOK)
 	} else if r.Method == "GET" {
 		var users []string
 		if users, err = b.GetUsers(); err != nil {
-			log.Printf("GetUsers: %v", err)
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			errorResponse(w, err, "cannot get users")
 			return
 		}
 		respond(w, &users)
@@ -289,8 +296,7 @@ func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 		jreq.User = session.user
 	}
 	if err = b.SetPassword(jreq.User, jreq.Password); err != nil {
-		log.Printf("SetPassword for %v: %v", jreq.User, err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		errorResponse(w, err, "cannot set password")
 		return
 	}
 	http.Error(w, "changed password", http.StatusOK)
@@ -326,20 +332,14 @@ func handleAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.NewAccount(jreq.Account); err != nil {
-			if err == bank.ErrAccountExists {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-			} else {
-				log.Printf("creating account: %v", err)
-				http.Error(w, "internal error", http.StatusInternalServerError)
-			}
+			errorResponse(w, err, "cannot create account")
 			return
 		}
 		http.Error(w, "created account", http.StatusOK)
 	} else if r.Method == "GET" {
 		var accounts []string
 		if accounts, err = b.GetAccounts(); err != nil {
-			log.Printf("GetAccounts: %v", err)
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			errorResponse(w, err, "getting accounts")
 			return
 		}
 		respond(w, &accounts)
@@ -379,9 +379,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.NewTransaction(session.user, jreq.Origin, jreq.Destination, jreq.Description, jreq.Amount); err != nil {
-			log.Printf("creating transaction: %v", err)
-			// TODO invalid origin/destination are Bad Request, anything else is internal error
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			errorResponse(w, err, "cannot create transaction")
 			return
 		}
 		http.Error(w, "created transaction", http.StatusOK)
@@ -396,8 +394,7 @@ func handleTransaction(w http.ResponseWriter, r *http.Request) {
 		after, _ := strconv.Atoi(r.FormValue("after"))
 		var transactions []bank.Transaction
 		if transactions, err = b.GetTransactions(limit, offset, after); err != nil {
-			log.Printf("get transactions: %v", err)
-			http.Error(w, "cannot get transactions", http.StatusInternalServerError)
+			errorResponse(w, err, "cannot get transactions")
 			return
 		}
 		respond(w, transactions)
@@ -434,9 +431,7 @@ func handleDistribute(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.Distribute(session.user, jreq.Origin, jreq.Destinations, jreq.Description); err != nil {
-			log.Printf("creating transaction: %v", err)
-			// TODO invalid origin/destination are Bad Request, anything else is internal error (NB not true, e.g. not enough funds)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			errorResponse(w, err, "cannot distribute")
 			return
 		}
 		http.Error(w, "distributed", http.StatusOK)
@@ -463,7 +458,7 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 		if key != "" {
 			var value string
 			if value, err = b.GetConfig(key); err != nil {
-				if err == bank.ErrNoConfig {
+				if err == bank.ErrNoSuchConfig {
 					http.Error(w, err.Error(), http.StatusNotFound)
 				} else {
 					log.Printf("getting configs: %v", err)
@@ -477,8 +472,7 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 		} else {
 			var configs map[string]string
 			if configs, err = b.GetConfigs(); err != nil {
-				log.Printf("getting configs: %v", err)
-				http.Error(w, "internal error", http.StatusInternalServerError)
+				errorResponse(w, err, "cannot get configuration item")
 				return
 			}
 			respond(w, configs)
@@ -503,8 +497,7 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.PutConfig(key, jreq.Value); err != nil {
-			log.Printf("putting config %v: %v", key, err)
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			errorResponse(w, err, "cannot set configuration item")
 			return
 		}
 		http.Error(w, "set configuration item", http.StatusOK)
@@ -557,8 +550,8 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			data.User = session.user
 		}
 		if err = template.Execute(&writer, data); err != nil {
-			log.Printf("executing template %s: %v", path, err)
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			log.Printf("cannot serve page: executing template %s: %v", path, err)
+			http.Error(w, "cannot serve page", http.StatusInternalServerError)
 			return
 		}
 		content = writer.String()

@@ -10,8 +10,8 @@ var defaultConfig = map[string]string{
 	"title":        "Test Bank",
 }
 
-// ErrNoConfig is return when a nonexistent configuration item is accessed.
-var ErrNoConfig = errors.New("no such configuration item")
+// ErrNoSuchConfig is return when a nonexistent configuration item is accessed.
+var ErrNoSuchConfig = errors.New("no such configuration item")
 
 // GetConfigs returns the full configuration table.
 func GetConfigs(tx *sql.Tx) (config map[string]string, err error) {
@@ -42,7 +42,7 @@ func GetConfig(tx *sql.Tx, key string) (value string, err error) {
 		if value, ok = defaultConfig[key]; ok {
 			err = nil
 		} else {
-			err = ErrNoConfig
+			err = ErrNoSuchConfig
 		}
 	}
 	if err != nil {

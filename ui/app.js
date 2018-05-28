@@ -132,9 +132,13 @@ function transactionToRow(transaction) {
 }
 
 // transactionsInit sets up the transactions table on page load
-// TODO doesn't cope with account list changing!
 function transactionsInit() {
     // Populate the balance columns and account dropdowns
+    //
+    // This only happens at page load and therefore does not cope with
+    // the set of accounts changing during the page's lifetime.
+    // I'm going to leave this as it is; the effort to fix it isn't
+    // justified by the expected usage model.
     var i, tr, select;
     tr = $("table.transactions > thead > tr");
     select = $("select.account,select.accounts");
@@ -144,9 +148,11 @@ function transactionsInit() {
     }
     // Populate the transactions table
     transactionsMore();
-    // Refresh the transactions table regularly
+    // Refresh the transactions table regularly.
+    // This has the effect of auto-bouncing you to /login.html when things go wrong.
+    // This isn't completely terrible (the login page will take you back to where
+    // you were) but it's not very pretty. I'll leave it for now.
     setInterval(transactionsRefresh, 10000);
-    // TODO this has the effect of auto-bouncing you to /login.html when things go wrong
     $("#more").on("click", transactionsMore);
 }
 

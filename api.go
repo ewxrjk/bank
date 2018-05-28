@@ -18,6 +18,12 @@ var ErrUserExists = errors.New("user exists")
 // ErrAccountExists is returned when creating an account that already exists.
 var ErrAccountExists = errors.New("account exists")
 
+// ErrInsufficientFunds is returned when there are insufficient funds for some action.
+var ErrInsufficientFunds = errors.New("insufficient funds")
+
+// ErrUnsuitableParties is returned when there is something wrong with the proposed parties to a transaction.
+var ErrUnsuitableParties = errors.New("invalid or inconsistent parties to transaction")
+
 // NewBank creates a new Bank object.
 func NewBank(driver, source string) (b *Bank, err error) {
 	b = &Bank{}
@@ -129,7 +135,7 @@ func (b *Bank) SetPassword(user, password string) (err error) {
 		}
 		return u.Put(tx, false)
 	})
-	if err != nil {
+	if err != nil && err != ErrNoSuchUser {
 		err = fmt.Errorf("changing user password: %v", err)
 	}
 	return
@@ -219,7 +225,7 @@ func (b *Bank) NewTransaction(user, origin, destination, description string, amo
 		}
 		return
 	})
-	if err != nil {
+	if err != nil && err != ErrUnsuitableParties && err != ErrNoSuchAccount {
 		err = fmt.Errorf("creating transaction: %v", err)
 	}
 	return
@@ -228,7 +234,7 @@ func (b *Bank) NewTransaction(user, origin, destination, description string, amo
 // newTransaction make a raw transaction
 func newTransaction(tx *sql.Tx, user string, o, d *Account, description string, amount int) (err error) {
 	if o.Account == d.Account {
-		err = fmt.Errorf("creating transaction: cannot transact with self")
+		err = ErrUnsuitableParties
 		return
 	}
 	if amount < 0 {
@@ -261,12 +267,12 @@ func newTransaction(tx *sql.Tx, user string, o, d *Account, description string, 
 // Distribute makes a distribution transaction.
 func (b *Bank) Distribute(user string, origin string, destinations []string, description string) (err error) {
 	if len(destinations) < 2 {
-		err = errors.New("creating distribution transaction: need more than one destination")
+		err = ErrUnsuitableParties
 		return
 	}
 	for _, destination := range destinations {
 		if origin == destination {
-			err = errors.New("creating distribution transaction: cannot distribute to self")
+			err = ErrUnsuitableParties
 			return
 		}
 	}
@@ -277,7 +283,7 @@ func (b *Bank) Distribute(user string, origin string, destinations []string, des
 		}
 		amount := o.Balance / len(destinations)
 		if amount == 0 {
-			err = errors.New("need enough money to distribute")
+			err = ErrInsufficientFunds
 			return
 		}
 		for _, destination := range destinations {
@@ -291,7 +297,7 @@ func (b *Bank) Distribute(user string, origin string, destinations []string, des
 		}
 		return
 	})
-	if err != nil {
+	if err != nil && err != ErrInsufficientFunds && err != ErrNoSuchAccount && err != ErrUnsuitableParties {
 		err = fmt.Errorf("creating distribution transaction: %v", err)
 	}
 	return
@@ -303,7 +309,7 @@ func (b *Bank) GetConfig(key string) (value string, err error) {
 		value, err = GetConfig(tx, key)
 		return
 	})
-	if err != nil && err != ErrNoConfig {
+	if err != nil && err != ErrNoSuchConfig {
 		err = fmt.Errorf("getting configuration: %v", err)
 	}
 	return
@@ -315,7 +321,7 @@ func (b *Bank) PutConfig(key, value string) (err error) {
 		err = PutConfig(tx, key, value)
 		return
 	})
-	if err != nil {
+	if err != nil && err != ErrNoSuchConfig {
 		err = fmt.Errorf("putting configuration: %v", err)
 	}
 	return
@@ -327,7 +333,7 @@ func (b *Bank) GetConfigs() (configs map[string]string, err error) {
 		configs, err = GetConfigs(tx)
 		return
 	})
-	if err != nil {
+	if err != nil && err != ErrNoSuchConfig {
 		err = fmt.Errorf("getting configuration: %v", err)
 	}
 	return

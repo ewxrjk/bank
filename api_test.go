@@ -162,7 +162,7 @@ func TestApiConfig(t *testing.T) {
 
 	// Gaps
 	value, err = b.GetConfig("junk")
-	require.Equal(t, ErrNoConfig, err)
+	require.Equal(t, ErrNoSuchConfig, err)
 
 	// Setting
 	require.NoError(t, b.PutConfig("houseAccount", "spong"))
