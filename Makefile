@@ -5,15 +5,18 @@ INSTALL=install
 
 all: check
 
-bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) cmd/bank/ui.go
+bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) cmd/bank/ui.go vendor
 	go build -o $@ ./cmd/bank
 
-embed: $(wildcard cmd/embed/*.go)
+embed: $(wildcard cmd/embed/*.go) vendor
 	go build -o $@ ./cmd/embed
 
 check: bank
 	go test -v ./...
 	./gbtest.py
+
+vendor:
+	dep ensure
 
 EMBED=$(wildcard ui/*.html) ui/app.js ui/app.css
 cmd/bank/ui.go: ${EMBED} Makefile embed
