@@ -540,7 +540,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			Token: "not logged in",
 		}
 		if data.Title, err = b.GetConfig("title"); err != nil {
-			log.Printf("getting title%v", err)
+			log.Printf("getting title: %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
