@@ -1,12 +1,25 @@
-# Bank
+# Description
 
 This is web application for tracking shared finances within a small, mutually trusting group.
 
-# Installation
-
-TODO
-
 # Setup
+
+## Installation
+
+You will need:
+
+- [Go](https://golang.org/)
+- [dep](https://github.com/golang/dep)
+- [Sqlite](https://www.sqlite.org/)
+
+To build and self-test the software:
+
+    dep ensure
+    make
+
+To install the `bank` command in `/usr/local/bin`:
+
+    sudo make install
 
 ## Database Setup
 
@@ -31,9 +44,62 @@ or via the web interface.
 
 Passwords may subsequently be changed either with `bank user pw` or via the web interface.
 
+You can set the name of the bank.
+This is used in the web interface.
+
+    $ bank -d bank.db config set title 'Example Bank'
+
 ## Server Setup
 
-TODO
+To run a server without TLS:
+
+    bank -d bank.db server --address :8080
+
+You can use the `--cert` and `--key` options to specify a TLS certificate and key.
+[Let's Encrypt](https://letsencrypt.org/) is the best way to acquire a certificate,
+but you can get started with a self-signed certificate as follows: 
+
+    openssl req -new -newkey rsa:2048 -x509 -nodes -subj /CN=www.example.com -keyout key.pem -out cert.pem
+    bank -d bank.db server --address :8080 --cert cert.pem --key key.pem
+
+# Usage
+
+A typical setup would have:
+
+- an account for each user, reflecting how much they are owed
+- an account called `house` reflecting how much the collective of users are owed.
+Normally `house` would have a negative balance, reflecting that the collective owes money to its individual members.
+
+The common actions in this model are:
+
+- payments from `house` to some individual's account, reflecting that the individual has made a payment on behalf of the collective.
+This can be done via the _New Transaction_ page, or via the form on the front page.
+- distribution of the `house` balance among the other accounts,
+reflecting that the collective's obligations full upon to its members.
+This can be done via the _Distribute_ page.
+- payments between individual users, reflecting offline resolution of these obligations.
+This can be done via the _New Transaction_ page, or via the form on the front page.
+
+## Example
+
+Suppose the users are `fred` and `bob`, and they are populating their kitchen.
+
+1. `fred` buys a toaster for £20.
+He fills in the details of this real-life transaction on the front page,
+causing a payment from `house` to `fred` of £20 to be recorded.
+2. `bob` buys a microwave oven for £40.
+He fills in the details on the front page,
+causing a payment from `house` to `bob` of £60 to be recorded.
+3. `fred` now has a balance of £20 and `bob` of £40.
+`house` has a balance of -£60.
+4. Any user uses the _Distribute_ page
+to distribute from `house` to `fred` and `bob`.
+This divides its balance into two and transfers each half to one of the human users.
+The effect is that `fred` has a balanced of -£10 and `bob` of £10.
+5. `fred` owes £10, and `bob` is owed £10, so (in real life) Fred hands Bob £10.
+6. Either user enters the details of this real-life transaction via the front page,
+causing a payment of £10 from `bob` to `fred` to be recorded,
+leaving each with a balance of £0.
 
 # Security
 
@@ -48,7 +114,7 @@ Please see the source code for the current default parameters.
 
 The server is implemented in [Go](https://golang.org/),
 a memory-safe language.
-Values are substitued into HTML pages using [html/template](https://golang.org/pkg/html/template/)
+Values are substituted into HTML pages using [html/template](https://golang.org/pkg/html/template/)
 and into database queries using placeholder parameters as described in the [database/sql](https://golang.org/pkg/database/sql/) API.
 
 User logins are tracked with a cookie and an associated token.

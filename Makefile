@@ -1,6 +1,7 @@
 bankdir=/var/lib/bank
 wwwdir=/var/www/bank
 testwwwdir=/var/www/testbank
+bindir=/usr/local/bin
 INSTALL=install
 
 all: check
@@ -21,6 +22,9 @@ vendor:
 EMBED=$(wildcard ui/*.html) ui/app.js ui/app.css
 cmd/bank/ui.go: ${EMBED} Makefile embed
 	./embed -o $@ -p main ${EMBED}
+
+install:
+	$(INSTALL) -m 555 bank $(bindir)/bank
 
 install-real: check
 	adduser --system --group --home $(bankdir) bank
@@ -43,14 +47,6 @@ install-test:
 	ln -sf ../sites-available/testbank /etc/apache2/sites-enabled
 	mkdir -m 755 -p /var/log/apache2/testbank
 	service apache2 reload
-
-setup-real: check
-	su bank -s $(SHELL) -c "sqlite3 -init bank.sql $(bankdir)/bank.db < /dev/null"
-	chmod 600 $(bankdir)/bank.db
-
-setup-test: check
-	su bank -s $(SHELL) -c "sqlite3 -init bank.sql $(bankdir)/testbank.db < /dev/null"
-	chmod 600 $(bankdir)/testbank.db
 
 clean:
 	rm -f bank embed
