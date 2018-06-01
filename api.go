@@ -123,6 +123,20 @@ func (b *Bank) GetUsers() (users []string, err error) {
 	return
 }
 
+// DeleteUser deletes a user
+func (b *Bank) DeleteUser(user string) (err error) {
+	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
+		if err = (&User{User: user}).Delete(tx); err != nil {
+			return
+		}
+		return
+	})
+	if err != nil && err != ErrNoSuchUser {
+		err = fmt.Errorf("deleting user: %v", err)
+	}
+	return
+}
+
 // SetPassword changes a user password.
 func (b *Bank) SetPassword(user, password string) (err error) {
 	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
@@ -164,7 +178,7 @@ func (b *Bank) CheckPassword(user, password string) (err error) {
 // NewAccount creates a new account.
 func (b *Bank) NewAccount(account string) (err error) {
 	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
-		if err = (&Account{}).Get(tx, account); err == nil {
+		if err = (&Account{Account: account}).Get(tx, account); err == nil {
 			err = ErrAccountExists
 			return
 		}
@@ -187,6 +201,20 @@ func (b *Bank) GetAccounts() (accounts []string, err error) {
 	})
 	if err != nil {
 		err = fmt.Errorf("getting accounts: %v", err)
+	}
+	return
+}
+
+// DeleteAccount deletes a user
+func (b *Bank) DeleteAccount(account string) (err error) {
+	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
+		if err = (&Account{Account: account}).Delete(tx); err != nil {
+			return
+		}
+		return
+	})
+	if err != nil && err != ErrAccountHasBalance && err != ErrNoSuchAccount {
+		err = fmt.Errorf("deleting account: %v", err)
 	}
 	return
 }

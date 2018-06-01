@@ -33,6 +33,14 @@ func TestApiUser(t *testing.T) {
 	users, err = b.GetUsers()
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"fred"}, users)
+
+	// Deleting
+	assert.Equal(t, ErrNoSuchUser, b.DeleteUser("bob"))
+	assert.NoError(t, b.DeleteUser("fred"))
+	users, err = b.GetUsers()
+	assert.NoError(t, err)
+	assert.Equal(t, []string{}, users)
+
 }
 
 func TestApiAccount(t *testing.T) {
@@ -134,6 +142,12 @@ func TestApiAccount(t *testing.T) {
 	assert.Equal(t, 2500, transactions[0].Amount)
 	assert.Equal(t, -500, transactions[0].OriginBalanceAfter)
 	assert.Equal(t, -1, transactions[0].DestinationBalanceAfter)
+
+	// Deleting
+	assert.Equal(t, ErrAccountHasBalance, b.DeleteAccount("fred"))
+	assert.Equal(t, ErrNoSuchAccount, b.DeleteAccount("joe"))
+	assert.NoError(t, b.NewTransaction("xfred", "bob", "fred", "Pay off Fred", 500))
+	assert.NoError(t, b.DeleteAccount("fred"))
 }
 
 func TestApiConfig(t *testing.T) {

@@ -15,8 +15,11 @@ type Account struct {
 	Balance int
 }
 
-// ErrNoSuchAccount is returned when accessing an account whic does not exist.
+// ErrNoSuchAccount is returned when accessing an account which does not exist.
 var ErrNoSuchAccount = errors.New("account does not exist")
+
+// ErrAccountHasBalance is returned when deleting a nonempty account.
+var ErrAccountHasBalance = errors.New("account has a nonzero nalance")
 
 // GetAccounts returns the list of account names.
 func GetAccounts(tx *sql.Tx) (accounts []string, err error) {
@@ -57,6 +60,31 @@ func (a *Account) Put(tx *sql.Tx, new bool) (err error) {
 		_, err = tx.Exec("UPDATE accounts SET balance=? WHERE user=?", a.Balance, a.Account)
 	}
 	if err != nil {
+		return
+	}
+	return
+}
+
+// Delete deletes an account.
+//
+// Accounts with nonzero balances cannot be deleted.
+func (a *Account) Delete(tx *sql.Tx) (err error) {
+	if err = a.Get(tx, a.Account); err != nil {
+		return
+	}
+	if a.Balance != 0 {
+		return ErrAccountHasBalance
+	}
+	var r sql.Result
+	if r, err = tx.Exec("DELETE FROM accounts WHERE user=?", a.Account); err != nil {
+		return
+	}
+	var rows int64
+	if rows, err = r.RowsAffected(); err != nil {
+		return
+	}
+	if rows != 1 {
+		err = ErrNoSuchAccount
 		return
 	}
 	return

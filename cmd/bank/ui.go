@@ -825,13 +825,12 @@ const appjs = ("// Login page\n" +
 	"function changePassword() {\n" +
 	"    var user;\n" +
 	"    $.ajax({\n" +
-	"        method: \"POST\",\n" +
+	"        method: \"PUT\",\n" +
 	"        data: JSON.stringify({\n" +
 	"            Token: $(\"#token\").val(),\n" +
 	"            Password: $(\"#password\").val(),\n" +
-	"            User: $(\"#user\").val(),\n" +
 	"        }),\n" +
-	"        url: \"/v1/user/password\",\n" +
+	"        url: \"/v1/user/\" +$(\"#user\").val() + \"/password\",\n" +
 	"        contentType: \"application/json\",\n" +
 	"        success: function () {\n" +
 	"            $(\"#success\").text(\"password changed\");\n" +

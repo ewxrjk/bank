@@ -240,13 +240,12 @@ function newAccount() {
 function changePassword() {
     var user;
     $.ajax({
-        method: "POST",
+        method: "PUT",
         data: JSON.stringify({
             Token: $("#token").val(),
             Password: $("#password").val(),
-            User: $("#user").val(),
         }),
-        url: "/v1/user/password",
+        url: "/v1/user/" +$("#user").val() + "/password",
         contentType: "application/json",
         success: function () {
             $("#success").text("password changed");

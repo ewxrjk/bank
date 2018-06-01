@@ -42,9 +42,6 @@ func (u *User) Get(tx *sql.Tx, user string) (err error) {
 	if err == sql.ErrNoRows {
 		err = ErrNoSuchUser
 	}
-	if err != nil {
-		return
-	}
 	return
 }
 
@@ -56,7 +53,21 @@ func (u *User) Put(tx *sql.Tx, new bool) (err error) {
 	} else {
 		_, err = tx.Exec("UPDATE users SET password=? WHERE user=?", u.Password, u.User)
 	}
-	if err != nil {
+	return
+}
+
+// Delete deletes a user.
+func (u *User) Delete(tx *sql.Tx) (err error) {
+	var r sql.Result
+	if r, err = tx.Exec("DELETE FROM users WHERE user=?", u.User); err != nil {
+		return
+	}
+	var rows int64
+	if rows, err = r.RowsAffected(); err != nil {
+		return
+	}
+	if rows != 1 {
+		err = ErrNoSuchUser
 		return
 	}
 	return

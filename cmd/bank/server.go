@@ -60,7 +60,6 @@ var namespace = []handlerPath{
 	{"/v1/login", handleLogin},
 	{"/v1/logout", handleLogout},
 	{"/v1/user/", handleUser},
-	{"/v1/user/password", handleUserPassword},
 	{"/v1/account/", handleAccount},
 	{"/v1/transaction/", handleTransaction},
 	{"/v1/distribute/", handleDistribute},
@@ -199,13 +198,13 @@ func respond(w http.ResponseWriter, jres interface{}) {
 
 // errorResponse issues an error response appropriate to err.
 func errorResponse(w http.ResponseWriter, err error, action string) {
+	log.Printf("%s: %v", action, err)
 	switch err {
 	case bank.ErrNoSuchUser, bank.ErrNoSuchConfig, bank.ErrNoSuchAccount,
 		bank.ErrUserExists, bank.ErrAccountExists,
 		bank.ErrInsufficientFunds, bank.ErrUnsuitableParties:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	default:
-		log.Printf("%s: %v", action, err)
 		http.Error(w, action, http.StatusInternalServerError)
 	}
 }
@@ -217,89 +216,108 @@ type NewUserRequest struct {
 	Token    string
 }
 
+// ChangePasswordRequest is the JSON request to change a password.
+type ChangePasswordRequest struct {
+	Password string
+	Token    string
+}
+
 // GET /v1/user/
 // POST /v1/user/
+// PUT /v1/user/{user}/password
+// DELETE /v1/user/{user}
 func handleUser(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
 	}
-	if r.Method == "POST" {
-		var jreq NewUserRequest
-		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-			log.Printf("decoding JSON: %v", err)
-			http.Error(w, "invalid request", http.StatusBadRequest)
+	bits := strings.Split(r.URL.Path[1:], "/") // "v1", "user", [user[, "password"]]
+	for bits[len(bits)-1] == "" {
+		bits = bits[0 : len(bits)-1]
+	}
+	switch len(bits) {
+	case 2:
+		switch r.Method {
+		case "POST":
+			var jreq NewUserRequest
+			if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+				log.Printf("decoding JSON: %v", err)
+				http.Error(w, "invalid request", http.StatusBadRequest)
+				return
+			}
+			if jreq.Token != session.token {
+				log.Printf("token mismatch")
+				http.Error(w, "inconsistent session", http.StatusForbidden)
+				return
+			}
+			if jreq.User == "" {
+				http.Error(w, "empty user name", http.StatusBadRequest)
+				return
+			}
+			if jreq.Password == "" {
+				http.Error(w, "empty password", http.StatusBadRequest)
+				return
+			}
+			if err = b.NewUser(jreq.User, jreq.Password); err != nil {
+				errorResponse(w, err, "cannot create user")
+				return
+			}
+			http.Error(w, "created user", http.StatusOK)
+		case "GET":
+			var users []string
+			if users, err = b.GetUsers(); err != nil {
+				errorResponse(w, err, "cannot get users")
+				return
+			}
+			respond(w, &users)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if jreq.Token != session.token {
-			log.Printf("token mismatch")
-			http.Error(w, "inconsistent session", http.StatusForbidden)
+	case 3:
+		switch r.Method {
+		case "DELETE":
+			if err = b.DeleteUser(bits[2]); err != nil {
+				errorResponse(w, err, "cannot get users")
+				return
+			}
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if jreq.User == "" {
-			http.Error(w, "empty user name", http.StatusBadRequest)
+	case 4:
+		switch r.Method {
+		case "PUT":
+			if bits[3] != "password" {
+				http.Error(w, "not found", http.StatusNotFound)
+				return
+			}
+			var jreq ChangePasswordRequest
+			var err error
+			if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+				log.Printf("decoding JSON: %v", err)
+				http.Error(w, "invalid request", http.StatusBadRequest)
+				return
+			}
+			if jreq.Token != session.token {
+				log.Printf("token mismatch")
+				http.Error(w, "inconsistent session", http.StatusForbidden)
+				return
+			}
+			if err = b.SetPassword(bits[2], jreq.Password); err != nil {
+				errorResponse(w, err, "cannot set password")
+				return
+			}
+			http.Error(w, "changed password", http.StatusOK)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if jreq.Password == "" {
-			http.Error(w, "empty password", http.StatusBadRequest)
-			return
-		}
-		if err = b.NewUser(jreq.User, jreq.Password); err != nil {
-			errorResponse(w, err, "cannot create user")
-			return
-		}
-		http.Error(w, "created user", http.StatusOK)
-	} else if r.Method == "GET" {
-		var users []string
-		if users, err = b.GetUsers(); err != nil {
-			errorResponse(w, err, "cannot get users")
-			return
-		}
-		respond(w, &users)
-	} else {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	default:
+		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-}
-
-// ChangePasswordRequest is the JSON request to change a password.
-type ChangePasswordRequest struct {
-	User     string
-	Password string
-	Token    string
-}
-
-// POST /v1/user/password
-func handleUserPassword(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "must use POST", http.StatusMethodNotAllowed)
-		return
-	}
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
-	var jreq ChangePasswordRequest
-	var err error
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		log.Printf("decoding JSON: %v", err)
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
-		return
-	}
-	if jreq.User == "" {
-		jreq.User = session.user
-	}
-	if err = b.SetPassword(jreq.User, jreq.Password); err != nil {
-		errorResponse(w, err, "cannot set password")
-		return
-	}
-	http.Error(w, "changed password", http.StatusOK)
 }
 
 // NewAccountRequest is the JSON request to create new account.

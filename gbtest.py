@@ -56,6 +56,9 @@ try:
     r = requests.get("http://%s/v1/user/" % address, cookies=cookies)
     r.raise_for_status()
     assert r.json() == ['bob', 'fred']
+    r = requests.put("http://%s/v1/user/bob/password" % address,
+                     json={"Password": "pass4", "Token": token}, cookies=cookies)
+    r.raise_for_status()
 
     # Enforce login credentials
     r = requests.get("http://%s/v1/account/" % address)
@@ -75,10 +78,16 @@ try:
                      address, cookies={'bank': 'whatever'})
     assert r.status_code == 403
     r = requests.post("http://%s/v1/user/" % address,
-                      json={"Account": "fred", "Token": "whatever"}, cookies=cookies)
+                      json={"User": "fred", "Token": "whatever"}, cookies=cookies)
     assert r.status_code == 403
     r = requests.post("http://%s/v1/user/" % address,
-                      json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
+                      json={"User": "fred", "Token": token}, cookies={'bank': 'whatever'})
+    assert r.status_code == 403
+    r = requests.put("http://%s/v1/user/bob/password" % address,
+                     json={"Password": "pass4", "Token": "whatever"}, cookies=cookies)
+    assert r.status_code == 403
+    r = requests.put("http://%s/v1/user/bob/password" % address,
+                     json={"Password": "pass4", "Token": token}, cookies={'bank': 'whatever'})
     assert r.status_code == 403
     r = requests.post("http://%s/v1/transaction/" % address,
                       json={"Origin": "house", "Destination": "fred",
