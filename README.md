@@ -53,14 +53,44 @@ This is used in the web interface.
 
 To run a server without TLS:
 
-    bank -d bank.db server --address :8080
+    $ bank -d bank.db server --address :8080
 
 You can use the `--cert` and `--key` options to specify a TLS certificate and key.
 [Let's Encrypt](https://letsencrypt.org/) is the best way to acquire a certificate,
 but you can get started with a self-signed certificate as follows: 
 
-    openssl req -new -newkey rsa:2048 -x509 -nodes -subj /CN=www.example.com -keyout key.pem -out cert.pem
-    bank -d bank.db server --address :8080 --cert cert.pem --key key.pem
+    $ openssl req -new -newkey rsa:2048 -x509 -nodes -subj /CN=www.example.com -keyout key.pem -out cert.pem
+    $ bank -d bank.db server --address :8080 --cert cert.pem --key key.pem
+
+## Deployment
+
+I run the service as its own user/group:
+
+    # useradd -Urmd/var/lib/bank bank
+    # su -lcbash bank
+    $ bank init
+    $ bank user add rjk
+    Enter password:
+    Confirm password:
+
+Administrative users may be added to the `bank` group.
+
+To run it as a daemon,
+edit `bank.service` and install and enable it:
+
+    # install -m644 bank.service /usr/local/lib/systemd/system/bank.service
+    # systemctl enable --now bank.service
+    Created symlink /etc/systemd/system/multi-user.target.wants/bank.service → /usr/local/lib/systemd/system/bank.service.
+
+I front-end the service with Apache,
+so I can take care of TLS in a uniform way
+with other services.
+The following directives forward requests to the service:
+
+	ProxyPass "/" "http://localhost:8344/"
+	ProxyPassReverse "/" "http://localhost:8344/"
+
+`mod_proxy` and `mod_proxy_http` must be enabled.
 
 # Usage
 
