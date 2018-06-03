@@ -151,3 +151,6 @@ User logins are tracked with a cookie and an associated token.
 The token is embedded into HTML pages
 and must be presented with all mutating operations.
 Non-mutating requests require only the cookie.
+
+The JavaScript UI uses [jQuery](https://jquery.com/) heavily.
+It constrains the jQuery code using sub-resource integrity.
