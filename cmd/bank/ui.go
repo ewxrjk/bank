@@ -73,7 +73,8 @@ const deluserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"    </form>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 const newuserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
@@ -335,6 +336,7 @@ const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Logout</h1>\n" +
 	"\n" +
 	"    <p id=error class=error></p>\n" +
@@ -413,7 +415,8 @@ const delaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"    </form>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
@@ -718,7 +721,7 @@ const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"    </div>\n" +
-	"    \n" +
+	"\n" +
 	"    <h1>{{.Title}}: Change Password</h1>\n" +
 	"\n" +
 	"    <form id=changepass>\n" +
@@ -1505,7 +1508,8 @@ const appcss = ("body {\n" +
 	"\n" +
 	"/* Change color of dropdown links on hover */\n" +
 	".dropdown-content a:hover {\n" +
-	"    background-color: #202020;\n" +
+	"    background-color: #f0f0f0;\n" +
+	"    color: black;\n" +
 	"}\n" +
 	"\n" +
 	"/* Show the dropdown menu on hover */\n" +
