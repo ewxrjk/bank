@@ -63,6 +63,7 @@ var namespace = util.HTTPNamespace{
 		{"DELETE", "^/v1/user/([^/]+)$", handleDeleteUser},
 		{"GET", "^/v1/account/?$", handleGetAccount},
 		{"POST", "^/v1/account/?$", handlePostAccount},
+		{"DELETE", "^/v1/account/([^/]+)$", handleDeleteAccount},
 		{"GET", "^/v1/transaction/?$", handleGetTransaction},
 		{"POST", "^/v1/transaction/?$", handlePostTransaction},
 		{"POST", "^/v1/distribute/?$", handlePostDistribute},
@@ -328,6 +329,18 @@ func handleGetAccount(w http.ResponseWriter, r *http.Request, matches []string) 
 		return
 	}
 	util.HTTPRespond(w, &accounts)
+}
+
+func handleDeleteAccount(w http.ResponseWriter, r *http.Request, matches []string) {
+	var err error
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	if err = b.DeleteAccount(matches[1]); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot delete account")
+		return
+	}
 }
 
 // NewTransactionRequest is the JSON request to create a new transaction.

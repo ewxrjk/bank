@@ -59,6 +59,14 @@ try:
     r = requests.put("http://%s/v1/user/bob/password" % address,
                      json={"Password": "pass4", "Token": token}, cookies=cookies)
     r.raise_for_status()
+    r = requests.post("http://%s/v1/user/" % address,
+                      json={"User": "joe", "Password": "pass3", "Token": token}, cookies=cookies)
+    r.raise_for_status()
+    r = requests.delete("http://%s/v1/user/joe" % address, cookies=cookies)
+    r.raise_for_status()
+    r = requests.delete("http://%s/v1/user/joe" % address, cookies=cookies)
+    assert r.status_code == 404
+
 
     # Enforce login credentials
     r = requests.get("http://%s/v1/account/" % address)
@@ -72,6 +80,8 @@ try:
     r = requests.post("http://%s/v1/account/" % address,
                       json={"Account": "fred", "Token": token}, cookies={'bank': 'whatever'})
     assert r.status_code == 403
+    r = requests.delete("http://%s/v1/account/fred" % address, cookies={'bank': 'whatever'})
+    assert r.status_code == 403
     r = requests.get("http://%s/v1/user/" % address)
     assert r.status_code == 403
     r = requests.get("http://%s/v1/user/" %
@@ -82,6 +92,8 @@ try:
     assert r.status_code == 403
     r = requests.post("http://%s/v1/user/" % address,
                       json={"User": "fred", "Token": token}, cookies={'bank': 'whatever'})
+    assert r.status_code == 403
+    r = requests.delete("http://%s/v1/user/joe" % address, cookies={'bank': 'whatever'})
     assert r.status_code == 403
     r = requests.put("http://%s/v1/user/bob/password" % address,
                      json={"Password": "pass4", "Token": "whatever"}, cookies=cookies)
@@ -138,6 +150,13 @@ try:
     r.raise_for_status()
     accounts = r.json()
     assert accounts == ["bob", "fred", "house"]
+    r = requests.post("http://%s/v1/account/" % address,
+                      json={"Account": "joe", "Token": token}, cookies=cookies)
+    r.raise_for_status()
+    r = requests.delete("http://%s/v1/account/joe" % address, cookies=cookies)
+    r.raise_for_status()
+    r = requests.delete("http://%s/v1/account/joe" % address, cookies=cookies)
+    assert r.status_code == 404
 
     # Transactions
     r = requests.get("http://%s/v1/transaction/?offset=0&limit=10" %
@@ -196,6 +215,10 @@ try:
     assert transactions[0]["Amount"] == 2500
     assert transactions[0]["OriginBalanceAfter"] == -500
     assert transactions[0]["DestinationBalanceAfter"] == -1
+
+    # Cannot delete accounts with a balance
+    r = requests.delete("http://%s/v1/account/bob" % address, cookies=cookies)
+    assert r.status_code == 400
 
     # Config
     r = requests.get("http://%s/v1/config/title" % address, cookies=cookies)

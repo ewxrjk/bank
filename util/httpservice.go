@@ -68,14 +68,20 @@ func HTTPRespond(w http.ResponseWriter, jres interface{}) {
 	json.NewEncoder(w).Encode(&jres)
 }
 
-// HTTPErrorReponse issues an error response appropriate to err.
+// HTTPErrorResponse issues an error response appropriate to err.
 func HTTPErrorResponse(w http.ResponseWriter, err error, action string) {
 	log.Printf("%s: %v", action, err)
 	switch err {
-	case bank.ErrNoSuchUser, bank.ErrNoSuchConfig, bank.ErrNoSuchAccount,
-		bank.ErrUserExists, bank.ErrAccountExists,
-		bank.ErrInsufficientFunds, bank.ErrUnsuitableParties:
+	case bank.ErrUserExists,
+		bank.ErrAccountExists,
+		bank.ErrAccountHasBalance,
+		bank.ErrInsufficientFunds,
+		bank.ErrUnsuitableParties:
 		http.Error(w, err.Error(), http.StatusBadRequest)
+	case bank.ErrNoSuchAccount,
+		bank.ErrNoSuchConfig,
+		bank.ErrNoSuchUser:
+		http.Error(w, err.Error(), http.StatusNotFound)
 	default:
 		http.Error(w, action, http.StatusInternalServerError)
 	}
