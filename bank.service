@@ -1,0 +1,15 @@
+[Unit]
+Description=bank web service
+ConditionPathExists=/var/lib/bank/bank.db
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=bank
+Group=bank
+Restart=on-failure
+WorkingDirectory=/var/lib/bank
+ExecStart=/usr/local/bin/bank server --address localhost:8344
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,4 @@
 *~
-bank.real
-bank.site.real
+/vendor
+/bank
+/embed

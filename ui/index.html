@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+
+<head>
+    <title>Transactions ({{.Title}})</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/app.js"></script>
+    <link rel=StyleSheet type="text/css" href="/app.css">
+</head>
+
+<body>
+    <div class=menu>
+        <div class=dropdown>
+            <button class=dropbtn>Transactions</button>
+            <div class="dropdown-content">
+                <a href="/">Transactions</a>
+                <a href="/transaction.html">New Transaction</a>
+                <a href="/distribute.html">Distribute</a>
+            </div>
+        </div>
+        <div class=dropdown>
+            <button class=dropbtn>Accounts</button>
+            <div class="dropdown-content">
+                <a href="/newaccount.html">New Account</a>
+                <a href="/delaccount.html">Delete Account</a>
+            </div>
+        </div>
+        <div class=dropdown>
+            <button class=dropbtn>Users</button>
+            <div class="dropdown-content">
+                <a href="/newuser.html">New User</a>
+                <a href="/deluser.html">Delete User</a>
+                <a href="/password.html">Change Password</a>
+                <a id=logout href="/logout.html">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <h1>{{.Title}}: Transactions</h1>
+
+    <form id=cookedTransaction>
+        <table class=form>
+            <tr>
+                <td>What happened</td>
+                <td>
+                    <select name="reason" id=reason>
+                        <option value=house selected>Bought a shared resource</option>
+                        <option value=payback>Repaid another party</option>
+                    </select>
+                </td>
+                <td class=error></td>
+            </tr>
+            <tr>
+                <td>Who paid</td>
+                <td>
+                    <select name="destination" class="account human" id=destination></select>
+                </td>
+                <td class=error></td>
+            </tr>
+            <tr id=originRow>
+                <td>Who was paid</td>
+                <td>
+                    <select name="origin" class="account" id=origin></select>
+                </td>
+                <td class=error></td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>
+                    <input name="description" type=text value="" id=description class=nonempty>
+                </td>
+                <td class=error></td>
+            </tr>
+            <tr>
+                <td>Amount</td>
+                <td>
+                    <input name="amount" type=text value="" id=amount class=currency>
+                </td>
+                <td class=error></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <input name="submit" type=submit value="Go" class=submit>
+                </td>
+                <td id=error class=error></td>
+                <td id=success class=success></td>
+            </tr>
+        </table>
+        <input name=token type=hidden value="{{.Token}}" id=token>
+    </form>
+
+    <hr>
+
+    <table class=transactions>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>ID</th>
+                <th>User</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <button id=more>More...</button>
+</body>
+
+</html>

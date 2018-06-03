@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+
+<head>
+    <title>Logout ({{.Title}})</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/app.js"></script>
+    <link rel=StyleSheet type="text/css" href="/app.css">
+</head>
+
+<body>
+    <div class=menu>
+        <div class=dropdown>
+            <button class=dropbtn>Transactions</button>
+            <div class="dropdown-content">
+                <a href="/">Transactions</a>
+                <a href="/transaction.html">New Transaction</a>
+                <a href="/distribute.html">Distribute</a>
+            </div>
+        </div>
+        <div class=dropdown>
+            <button class=dropbtn>Accounts</button>
+            <div class="dropdown-content">
+                <a href="/newaccount.html">New Account</a>
+                <a href="/delaccount.html">Delete Account</a>
+            </div>
+        </div>
+        <div class=dropdown>
+            <button class=dropbtn>Users</button>
+            <div class="dropdown-content">
+                <a href="/newuser.html">New User</a>
+                <a href="/deluser.html">Delete User</a>
+                <a href="/password.html">Change Password</a>
+                <a id=logout href="/logout.html">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <h1>{{.Title}}: Logout</h1>
+
+    <p id=error class=error></p>
+</body>
+
+</html>

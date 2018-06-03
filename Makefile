@@ -1,22 +1,30 @@
 bankdir=/var/lib/bank
 wwwdir=/var/www/bank
 testwwwdir=/var/www/testbank
+bindir=/usr/local/bin
 INSTALL=install
 
-all: bank.real bank.site.real
+all: check
 
-bank.real: bank
-	rm -f bank.real
-	sed < bank > bank.real s/testbank/bank/g;
-	chmod 555 bank.real
+bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) $(wildcard */*.go) cmd/bank/ui.go vendor
+	go build -o $@ ./cmd/bank
 
-bank.site.real: bank.site
-	rm -f bank.site.real
-	sed < bank.site > bank.site.real s/testbank/bank/g;
-	chmod 444 bank.site.real
+embed: $(wildcard cmd/embed/*.go) vendor
+	go build -o $@ ./cmd/embed
 
-check:
-	perl -wc bank
+check: bank
+	go test -v ./...
+	./gbtest.py
+
+vendor:
+	dep ensure
+
+EMBED=$(sort $(wildcard ui/*.html ui/*.png) ui/app.js ui/app.css)
+cmd/bank/ui.go: ${EMBED} Makefile embed
+	./embed -o $@ -p main ${EMBED}
+
+install:
+	$(INSTALL) -m 555 bank $(bindir)/bank
 
 install-real: check
 	adduser --system --group --home $(bankdir) bank
@@ -40,16 +48,5 @@ install-test:
 	mkdir -m 755 -p /var/log/apache2/testbank
 	service apache2 reload
 
-setup-real: check
-	su bank -s $(SHELL) -c "sqlite3 -init bank.sql $(bankdir)/bank.db < /dev/null"
-	chmod 600 $(bankdir)/bank.db
-
-setup-test: check
-	su bank -s $(SHELL) -c "sqlite3 -init bank.sql $(bankdir)/testbank.db < /dev/null"
-	chmod 600 $(bankdir)/testbank.db
-
 clean:
-	rm -f bank.real
-	rm -f bank.site.real
-
-# TODO logfile rotation
+	rm -f bank embed
