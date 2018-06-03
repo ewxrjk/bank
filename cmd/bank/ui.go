@@ -1,11 +1,11 @@
 package main
 
 // Automatically generated code, don't edit
-const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+const deluserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
 	"<head>\n" +
-	"    <title>Login ({{.Title}})</title>\n" +
+	"    <title>New User ({{.Title}})</title>\n" +
 	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
 	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
 	"\n" +
@@ -29,12 +29,14 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            <button class=dropbtn>Accounts</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"        <div class=dropdown>\n" +
 	"            <button class=dropbtn>Users</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
 	"                    <a href=\"/password.html\">Change Password</" +
 	"a>\n" +
 	"                    <a id=logout href=\"/logout.html\">Logout</a" +
@@ -44,123 +46,23 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        </div>\n" +
 	"    </div>\n" +
 	"\n" +
-	"    <h1>{{.Title}}: Login</h1>\n" +
+	"    <h1>{{.Title}}: Delete User</h1>\n" +
 	"\n" +
-	"    <form id=login>\n" +
+	"    <form id=deluser>\n" +
 	"        <table class=form>\n" +
 	"            <tr>\n" +
-	"                <td>User name</td>\n" +
+	"                <td>User</td>\n" +
 	"                <td>\n" +
-	"                    <input id=user type=text autocomplete=userna" +
-	"me value=\"\" class=nonempty>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Password</td>\n" +
-	"                <td>\n" +
-	"                    <input id=password type=password autocomplet" +
-	"e=\"current-password\" value=\"\" class=nonempty>\n" +
+	"                    <select name=\"user\" class=\"user\" id=user" +
+	"></select>\n" +
 	"                </td>\n" +
 	"                <td class=error></td>\n" +
 	"            </tr>\n" +
 	"            <tr>\n" +
 	"                <td></td>\n" +
 	"                <td>\n" +
-	"                    <input type=submit value=Login class=submit>" +
-	"\n" +
-	"                </td>\n" +
-	"                <td id=error class=error></td>\n" +
-	"            </tr>\n" +
-	"        </table>\n" +
-	"    </form>\n" +
-	"</body>\n" +
-	"\n" +
-	"</html>")
-const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
-	"<html>\n" +
-	"\n" +
-	"<head>\n" +
-	"    <title>New Transaction ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
-	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
-	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
-	"</head>\n" +
-	"\n" +
-	"<body>\n" +
-	"    <div class=menu>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Transactions</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/\">Transactions</a> \n" +
-	"                <a href=\"/transaction.html\">New Transaction</a" +
+	"                    <input type=submit value=Delete class=submit" +
 	">\n" +
-	"                <a href=\"/distribute.html\">Distribute</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Accounts</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/newaccount.html\">New Account</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Users</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                    <a href=\"/newuser.html\">New User</a>\n" +
-	"                    <a href=\"/password.html\">Change Password</" +
-	"a>\n" +
-	"                    <a id=logout href=\"/logout.html\">Logout</a" +
-	">\n" +
-	"                </div>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"    </div>\n" +
-	"\n" +
-	"    <h1>{{.Title}}: New Transaction</h1>\n" +
-	"\n" +
-	"    <form id=newTransaction>\n" +
-	"        <table class=form>\n" +
-	"            <tr>\n" +
-	"                <td>Description</td>\n" +
-	"                <td>\n" +
-	"                    <input name=\"description\" type=text value=" +
-	"\"\" id=description class=nonempty>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Origin</td>\n" +
-	"                <td>\n" +
-	"                    <select name=\"origin\" class=\"account\" id" +
-	"=origin></select>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Destination</td>\n" +
-	"                <td>\n" +
-	"                    <select name=\"destination\" class=account i" +
-	"d=destination></select>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Amount</td>\n" +
-	"                <td>\n" +
-	"                    <input name=\"amount\" type=text value=\"\" " +
-	"id=amount class=currency>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td></td>\n" +
-	"                <td>\n" +
-	"                    <input name=\"submit\" type=submit value=\"N" +
-	"ew Transaction\" class=submit>\n" +
 	"                </td>\n" +
 	"                <td id=error class=error></td>\n" +
 	"                <td id=success class=success></td>\n" +
@@ -169,263 +71,6 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
-	"\n" +
-	"    <hr>\n" +
-	"\n" +
-	"    <table class=transactions>\n" +
-	"        <thead>\n" +
-	"            <tr>\n" +
-	"                <th>Time</th>\n" +
-	"                <th>ID</th>\n" +
-	"                <th>User</th>\n" +
-	"                <th>Description</th>\n" +
-	"                <th>Amount</th>\n" +
-	"                <th>From</th>\n" +
-	"                <th>To</th>\n" +
-	"            </tr>\n" +
-	"        </thead>\n" +
-	"        <tbody>\n" +
-	"        </tbody>\n" +
-	"    </table>\n" +
-	"    <button id=more>More...</button>\n" +
-	"</body>\n" +
-	"\n" +
-	"</html>")
-const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
-	"<html>\n" +
-	"\n" +
-	"<head>\n" +
-	"    <title>Logout ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
-	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
-	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
-	"</head>\n" +
-	"\n" +
-	"<body>\n" +
-	"    <div class=menu>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Transactions</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/\">Transactions</a> \n" +
-	"                <a href=\"/transaction.html\">New Transaction</a" +
-	">\n" +
-	"                <a href=\"/distribute.html\">Distribute</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Accounts</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/newaccount.html\">New Account</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Users</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                    <a href=\"/newuser.html\">New User</a>\n" +
-	"                    <a href=\"/password.html\">Change Password</" +
-	"a>\n" +
-	"                    <a id=logout href=\"/logout.html\">Logout</a" +
-	">\n" +
-	"                </div>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"    </div>\n" +
-	"\n" +
-	"    <h1>{{.Title}}: Logout</h1>\n" +
-	"\n" +
-	"    <p id=error class=error></p>\n" +
-	"</body>\n" +
-	"\n" +
-	"</html>")
-const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
-	"<html>\n" +
-	"\n" +
-	"<head>\n" +
-	"    <title>Change Password ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
-	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
-	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
-	"</head>\n" +
-	"\n" +
-	"<body>\n" +
-	"    <div class=menu>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Transactions</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/\">Transactions</a> \n" +
-	"                <a href=\"/transaction.html\">New Transaction</a" +
-	">\n" +
-	"                <a href=\"/distribute.html\">Distribute</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Accounts</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/newaccount.html\">New Account</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Users</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                    <a href=\"/newuser.html\">New User</a>\n" +
-	"                    <a href=\"/password.html\">Change Password</" +
-	"a>\n" +
-	"                    <a id=logout href=\"/logout.html\">Logout</a" +
-	">\n" +
-	"                </div>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"    </div>\n" +
-	"\n" +
-	"    <h1>{{.Title}}: Change Password</h1>\n" +
-	"\n" +
-	"    <form id=changepass>\n" +
-	"        <table class=form>\n" +
-	"            <tr>\n" +
-	"                <td>New password</td>\n" +
-	"                <td>\n" +
-	"                    <input id=password type=password autocomplet" +
-	"e=\"new-password\" value=\"\" class=\"nonempty newpassword\">\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Confirm password</td>\n" +
-	"                <td>\n" +
-	"                    <input id=password2 type=password autocomple" +
-	"te=\"new-password\" value=\"\" class=\"nonempty newpassword\">\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td></td>\n" +
-	"                <td>\n" +
-	"                    <input type=submit value=Change class=submit" +
-	">\n" +
-	"                </td>\n" +
-	"                <td id=error class=error></td>\n" +
-	"                <td id=success class=success></td>\n" +
-	"            </tr>\n" +
-	"        </table>\n" +
-	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
-	"ken>\n" +
-	"        <input name=user type=hidden autocomplete=\"username\" v" +
-	"alue=\"{{.User}}\" id=user>\n" +
-	"    </form>\n" +
-	"</body>\n" +
-	"\n" +
-	"</html>")
-const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
-	"<html>\n" +
-	"\n" +
-	"<head>\n" +
-	"    <title>Distribute ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
-	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
-	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
-	"</head>\n" +
-	"\n" +
-	"<body>\n" +
-	"    <div class=menu>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Transactions</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/\">Transactions</a> \n" +
-	"                <a href=\"/transaction.html\">New Transaction</a" +
-	">\n" +
-	"                <a href=\"/distribute.html\">Distribute</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Accounts</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                <a href=\"/newaccount.html\">New Account</a>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"        <div class=dropdown>\n" +
-	"            <button class=dropbtn>Users</button>\n" +
-	"            <div class=\"dropdown-content\">\n" +
-	"                    <a href=\"/newuser.html\">New User</a>\n" +
-	"                    <a href=\"/password.html\">Change Password</" +
-	"a>\n" +
-	"                    <a id=logout href=\"/logout.html\">Logout</a" +
-	">\n" +
-	"                </div>\n" +
-	"            </div>\n" +
-	"        </div>\n" +
-	"    </div>\n" +
-	"\n" +
-	"    <h1>{{.Title}}: Distribute</h1>\n" +
-	"\n" +
-	"    <form id=distribute>\n" +
-	"        <table  class=form>\n" +
-	"            <tr>\n" +
-	"                <td>Description</td>\n" +
-	"                <td>\n" +
-	"                    <input name=\"description\" type=text value=" +
-	"\"distribution\" id=description class=nonempty>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Origin</td>\n" +
-	"                <td>\n" +
-	"                    <select name=\"origin\" class=account id=ori" +
-	"gin></select>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td>Destination</td>\n" +
-	"                <td>\n" +
-	"                    <select multiple name=\"destinations\" class" +
-	"=accounts id=destinations>\n" +
-	"                </td>\n" +
-	"                <td class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td></td>\n" +
-	"                <td>\n" +
-	"                    <input name=\"submit\" type=submit value=\"D" +
-	"istribute\" class=submit>\n" +
-	"                </td>\n" +
-	"                <td id=error class=error></td>\n" +
-	"            </tr>\n" +
-	"            <tr>\n" +
-	"                <td colspan=3 id=success class=success></td>\n" +
-	"            </tr>\n" +
-	"        </table>\n" +
-	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
-	"ken>\n" +
-	"    </form>\n" +
-	"\n" +
-	"    <hr>\n" +
-	"\n" +
-	"    <table class=transactions>\n" +
-	"        <thead>\n" +
-	"            <tr>\n" +
-	"                <th>Time</th>\n" +
-	"                <th>ID</th>\n" +
-	"                <th>User</th>\n" +
-	"                <th>Description</th>\n" +
-	"                <th>Amount</th>\n" +
-	"                <th>From</th>\n" +
-	"                <th>To</th>\n" +
-	"            </tr>\n" +
-	"        </thead>\n" +
-	"        <tbody>\n" +
-	"        </tbody>\n" +
-	"    </table>\n" +
-	"    <button id=more>More...</button>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -457,12 +102,14 @@ const newuserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            <button class=dropbtn>Accounts</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"        <div class=dropdown>\n" +
 	"            <button class=dropbtn>Users</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
 	"                    <a href=\"/password.html\">Change Password</" +
 	"a>\n" +
 	"                    <a id=logout href=\"/logout.html\">Logout</a" +
@@ -544,12 +191,14 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            <button class=dropbtn>Accounts</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"        <div class=dropdown>\n" +
 	"            <button class=dropbtn>Users</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
 	"                    <a href=\"/password.html\">Change Password</" +
 	"a>\n" +
 	"                    <a id=logout href=\"/logout.html\">Logout</a" +
@@ -642,6 +291,129 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
+const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>Logout ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"    <h1>{{.Title}}: Logout</h1>\n" +
+	"\n" +
+	"    <p id=error class=error></p>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
+const delaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>New User ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
+	"    <h1>{{.Title}}: Delete Account</h1>\n" +
+	"\n" +
+	"    <form id=delaccount>\n" +
+	"        <table class=form>\n" +
+	"            <tr>\n" +
+	"                <td>User</td>\n" +
+	"                <td>\n" +
+	"                    <select name=\"account\" class=\"account\" i" +
+	"d=account></select>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td></td>\n" +
+	"                <td>\n" +
+	"                    <input type=submit value=Delete class=submit" +
+	">\n" +
+	"                </td>\n" +
+	"                <td id=error class=error></td>\n" +
+	"                <td id=success class=success></td>\n" +
+	"            </tr>\n" +
+	"        </table>\n" +
+	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
+	"ken>\n" +
+	"    </form>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
 const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
@@ -670,12 +442,14 @@ const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"            <button class=dropbtn>Accounts</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
 	"            </div>\n" +
 	"        </div>\n" +
 	"        <div class=dropdown>\n" +
 	"            <button class=dropbtn>Users</button>\n" +
 	"            <div class=\"dropdown-content\">\n" +
 	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
 	"                    <a href=\"/password.html\">Change Password</" +
 	"a>\n" +
 	"                    <a id=logout href=\"/logout.html\">Logout</a" +
@@ -709,6 +483,393 @@ const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
+const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>Distribute ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
+	"    <h1>{{.Title}}: Distribute</h1>\n" +
+	"\n" +
+	"    <form id=distribute>\n" +
+	"        <table  class=form>\n" +
+	"            <tr>\n" +
+	"                <td>Description</td>\n" +
+	"                <td>\n" +
+	"                    <input name=\"description\" type=text value=" +
+	"\"distribution\" id=description class=nonempty>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Origin</td>\n" +
+	"                <td>\n" +
+	"                    <select name=\"origin\" class=account id=ori" +
+	"gin></select>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Destination</td>\n" +
+	"                <td>\n" +
+	"                    <select multiple name=\"destinations\" class" +
+	"=accounts id=destinations>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td></td>\n" +
+	"                <td>\n" +
+	"                    <input name=\"submit\" type=submit value=\"D" +
+	"istribute\" class=submit>\n" +
+	"                </td>\n" +
+	"                <td id=error class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td colspan=3 id=success class=success></td>\n" +
+	"            </tr>\n" +
+	"        </table>\n" +
+	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
+	"ken>\n" +
+	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"\n" +
+	"    <table class=transactions>\n" +
+	"        <thead>\n" +
+	"            <tr>\n" +
+	"                <th>Time</th>\n" +
+	"                <th>ID</th>\n" +
+	"                <th>User</th>\n" +
+	"                <th>Description</th>\n" +
+	"                <th>Amount</th>\n" +
+	"                <th>From</th>\n" +
+	"                <th>To</th>\n" +
+	"            </tr>\n" +
+	"        </thead>\n" +
+	"        <tbody>\n" +
+	"        </tbody>\n" +
+	"    </table>\n" +
+	"    <button id=more>More...</button>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
+const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>Login ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
+	"    <h1>{{.Title}}: Login</h1>\n" +
+	"\n" +
+	"    <form id=login>\n" +
+	"        <table class=form>\n" +
+	"            <tr>\n" +
+	"                <td>User name</td>\n" +
+	"                <td>\n" +
+	"                    <input id=user type=text autocomplete=userna" +
+	"me value=\"\" class=nonempty>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Password</td>\n" +
+	"                <td>\n" +
+	"                    <input id=password type=password autocomplet" +
+	"e=\"current-password\" value=\"\" class=nonempty>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td></td>\n" +
+	"                <td>\n" +
+	"                    <input type=submit value=Login class=submit>" +
+	"\n" +
+	"                </td>\n" +
+	"                <td id=error class=error></td>\n" +
+	"            </tr>\n" +
+	"        </table>\n" +
+	"    </form>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
+const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>Change Password ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"    \n" +
+	"    <h1>{{.Title}}: Change Password</h1>\n" +
+	"\n" +
+	"    <form id=changepass>\n" +
+	"        <table class=form>\n" +
+	"            <tr>\n" +
+	"                <td>New password</td>\n" +
+	"                <td>\n" +
+	"                    <input id=password type=password autocomplet" +
+	"e=\"new-password\" value=\"\" class=\"nonempty newpassword\">\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Confirm password</td>\n" +
+	"                <td>\n" +
+	"                    <input id=password2 type=password autocomple" +
+	"te=\"new-password\" value=\"\" class=\"nonempty newpassword\">\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td></td>\n" +
+	"                <td>\n" +
+	"                    <input type=submit value=Change class=submit" +
+	">\n" +
+	"                </td>\n" +
+	"                <td id=error class=error></td>\n" +
+	"                <td id=success class=success></td>\n" +
+	"            </tr>\n" +
+	"        </table>\n" +
+	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
+	"ken>\n" +
+	"        <input name=user type=hidden autocomplete=\"username\" v" +
+	"alue=\"{{.User}}\" id=user>\n" +
+	"    </form>\n" +
+	"</body>\n" +
+	"\n" +
+	"</html>")
+const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
+	"<html>\n" +
+	"\n" +
+	"<head>\n" +
+	"    <title>New Transaction ({{.Title}})</title>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
+	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
+	"\n" +
+	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
+	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"                <a href=\"/delaccount.html\">Delete Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/deluser.html\">Delete User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
+	"    <h1>{{.Title}}: New Transaction</h1>\n" +
+	"\n" +
+	"    <form id=newTransaction>\n" +
+	"        <table class=form>\n" +
+	"            <tr>\n" +
+	"                <td>Description</td>\n" +
+	"                <td>\n" +
+	"                    <input name=\"description\" type=text value=" +
+	"\"\" id=description class=nonempty>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Origin</td>\n" +
+	"                <td>\n" +
+	"                    <select name=\"origin\" class=\"account\" id" +
+	"=origin></select>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Destination</td>\n" +
+	"                <td>\n" +
+	"                    <select name=\"destination\" class=account i" +
+	"d=destination></select>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td>Amount</td>\n" +
+	"                <td>\n" +
+	"                    <input name=\"amount\" type=text value=\"\" " +
+	"id=amount class=currency>\n" +
+	"                </td>\n" +
+	"                <td class=error></td>\n" +
+	"            </tr>\n" +
+	"            <tr>\n" +
+	"                <td></td>\n" +
+	"                <td>\n" +
+	"                    <input name=\"submit\" type=submit value=\"N" +
+	"ew Transaction\" class=submit>\n" +
+	"                </td>\n" +
+	"                <td id=error class=error></td>\n" +
+	"                <td id=success class=success></td>\n" +
+	"            </tr>\n" +
+	"        </table>\n" +
+	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
+	"ken>\n" +
+	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"\n" +
+	"    <table class=transactions>\n" +
+	"        <thead>\n" +
+	"            <tr>\n" +
+	"                <th>Time</th>\n" +
+	"                <th>ID</th>\n" +
+	"                <th>User</th>\n" +
+	"                <th>Description</th>\n" +
+	"                <th>Amount</th>\n" +
+	"                <th>From</th>\n" +
+	"                <th>To</th>\n" +
+	"            </tr>\n" +
+	"        </thead>\n" +
+	"        <tbody>\n" +
+	"        </tbody>\n" +
+	"    </table>\n" +
+	"    <button id=more>More...</button>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -928,7 +1089,6 @@ const appjs = ("// Login page\n" +
 	"        success: function () {\n" +
 	"            $(\"#success\").text(\"user \" + user + \" created\"" +
 	");\n" +
-	"            updateUsers();\n" +
 	"            // Clear the form. This seems a bit ugly but it does" +
 	"n't make sense\n" +
 	"            // to re-use usernames or passwords so I think it's " +
@@ -939,6 +1099,27 @@ const appjs = ("// Login page\n" +
 	"            $(\"#user\").val(\"\");\n" +
 	"            $(\"#password\").val(\"\");\n" +
 	"            $(\"#password2\").val(\"\");\n" +
+	"            updateUsers();\n" +
+	"        },\n" +
+	"        error: ajaxFailed,\n" +
+	"    });\n" +
+	"    return false;\n" +
+	"}\n" +
+	"\n" +
+	"// Delete user page\n" +
+	"\n" +
+	"// delUser issues a user deletion request.\n" +
+	"function delUser() {\n" +
+	"    var user;\n" +
+	"    user = $(\"#user\").val();\n" +
+	"    $.ajax({\n" +
+	"        method: \"DELETE\",\n" +
+	"        url: \"/v1/user/\" + user,\n" +
+	"        success: function () {\n" +
+	"            $(\"#success\").text(\"user \" + user + \" deleted\"" +
+	");\n" +
+	"            $(\"#user\").val(\"\");\n" +
+	"            updateUsers();\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
 	"    });\n" +
@@ -962,9 +1143,29 @@ const appjs = ("// Login page\n" +
 	"        success: function () {\n" +
 	"            $(\"#success\").text(\"account \" + account + \" cre" +
 	"ated\");\n" +
-	"            updateAccounts();\n" +
 	"            // Clear the form. See discussion in newUser.\n" +
 	"            $(\"#account\").val(\"\");\n" +
+	"            updateAccounts();\n" +
+	"        },\n" +
+	"        error: ajaxFailed,\n" +
+	"    });\n" +
+	"    return false;\n" +
+	"}\n" +
+	"\n" +
+	"// Delete account page\n" +
+	"\n" +
+	"// delAccount issues an account deletion request.\n" +
+	"function delAccount() {\n" +
+	"    var account;\n" +
+	"    account = $(\"#account\").val();\n" +
+	"    $.ajax({\n" +
+	"        method: \"DELETE\",\n" +
+	"        url: \"/v1/account/\" + account,\n" +
+	"        success: function () {\n" +
+	"            $(\"#success\").text(\"account \" + account + \" del" +
+	"eted\");\n" +
+	"            $(\"#account\").val(\"\");\n" +
+	"            updateAccounts();\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
 	"    });\n" +
@@ -1099,7 +1300,6 @@ const appjs = ("// Login page\n" +
 	"}\n" +
 	"\n" +
 	"// Initialization\n" +
-	"\n" +
 	"// initialize gets configuration and sets up everything that nee" +
 	"ds it.\n" +
 	"function initialize() {\n" +
@@ -1121,9 +1321,9 @@ const appjs = ("// Login page\n" +
 	"    });\n" +
 	"    $.when(u, a, c).done(function (ur, ar, cr) {\n" +
 	"        var i, tr, select;\n" +
-	"        users = ur[0];\n" +
-	"        accounts = ar[0]\n" +
 	"        config = cr[0];\n" +
+	"        newUsers(ur[0])\n" +
+	"        newAccounts(ar[0]);\n" +
 	"        // Initialize the transactions table if present\n" +
 	"        if ($(\"table.transactions\").length > 0) {\n" +
 	"            // Populate the balance columns\n" +
@@ -1152,24 +1352,57 @@ const appjs = ("// Login page\n" +
 	"            setInterval(transactionsRefresh, 10000);\n" +
 	"            $(\"#more\").on(\"click\", transactionsMore);\n" +
 	"        }\n" +
-	"        // Populate the account dropdowns\n" +
-	"        select = $(\"select.account,select.accounts\");\n" +
-	"        for (i = 0; i < accounts.length; i++) {\n" +
-	"            select.append($(\"<option>\").text(accounts[i]));\n" +
-	"        }\n" +
-	"        // If there is a house account it should be the default " +
-	"transaction origin\n" +
-	"        // for generic transactions; but we don't do this for th" +
-	"e cooked transaction\n" +
-	"        // form.\n" +
-	"        if (accounts.includes(config[\"houseAccount\"])) {\n" +
-	"            if (!$(\"select#origin\").hasClass(\"human\")) {\n" +
-	"                $(\"select#origin\").val(config[\"houseAccount\"" +
-	"]);\n" +
-	"            }\n" +
-	"        }\n" +
 	"        initializeValidation();\n" +
 	"    }).fail(ajaxFailed);\n" +
+	"}\n" +
+	"\n" +
+	"function updateAccounts() {\n" +
+	"    $.ajax({\n" +
+	"        url: \"/v1/account/\",\n" +
+	"        dataType: \"json\",\n" +
+	"        success: newAccounts,\n" +
+	"    });\n" +
+	"}\n" +
+	"\n" +
+	"function newAccounts(a) {\n" +
+	"    var i, select;\n" +
+	"    accounts = a;\n" +
+	"    // Populate the account dropdowns\n" +
+	"    select = $(\"select.account,select.accounts\");\n" +
+	"    select.find('option').remove()\n" +
+	"    for (i = 0; i < accounts.length; i++) {\n" +
+	"        select.append($(\"<option>\").text(accounts[i]));\n" +
+	"    }\n" +
+	"    // If there is a house account it should be the default tran" +
+	"saction origin\n" +
+	"    // for generic transactions; but we don't do this for the co" +
+	"oked transaction\n" +
+	"    // form.\n" +
+	"    if (accounts.includes(config[\"houseAccount\"])) {\n" +
+	"        if (!$(\"select#origin\").hasClass(\"human\")) {\n" +
+	"            $(\"select#origin\").val(config[\"houseAccount\"]);\n" +
+	"        }\n" +
+	"    }\n" +
+	"}\n" +
+	"\n" +
+	"function updateUsers() {\n" +
+	"    $.ajax({\n" +
+	"        url: \"/v1/user/\",\n" +
+	"        dataType: \"json\",\n" +
+	"        success: newUsers,\n" +
+	"    });\n" +
+	"}\n" +
+	"\n" +
+	"function newUsers(u) {\n" +
+	"    var i, select;\n" +
+	"    users = u;\n" +
+	"    // Populate the user dropdowns\n" +
+	"    select = $(\"select.user,select.users\");\n" +
+	"    select.find('option').remove()\n" +
+	"    for (i = 0; i < users.length; i++) {\n" +
+	"        select.append($(\"<option>\").text(users[i]));\n" +
+	"    }\n" +
+	"   \n" +
 	"}\n" +
 	"\n" +
 	"// initializeValidation sets up form validation logic\n" +
@@ -1193,7 +1426,9 @@ const appjs = ("// Login page\n" +
 	");\n" +
 	"    $(\"form#distribute\").on(\"submit\", distribute);\n" +
 	"    $(\"form#newuser\").on(\"submit\", newUser);\n" +
+	"    $(\"form#deluser\").on(\"submit\", delUser);\n" +
 	"    $(\"form#newaccount\").on(\"submit\", newAccount);\n" +
+	"    $(\"form#delaccount\").on(\"submit\", delAccount);\n" +
 	"    $(\"form#changepass\").on(\"submit\", changePassword);\n" +
 	"    // Initial validation of forms\n" +
 	"    $(\"form\").each(function (i, f) {\n" +
@@ -1287,26 +1522,30 @@ const appcss = ("body {\n" +
 	"")
 
 var embedContent = map[string]string{
-	"login.html":       loginhtml,
-	"transaction.html": transactionhtml,
-	"logout.html":      logouthtml,
-	"password.html":    passwordhtml,
-	"distribute.html":  distributehtml,
+	"deluser.html":     deluserhtml,
 	"newuser.html":     newuserhtml,
 	"index.html":       indexhtml,
+	"logout.html":      logouthtml,
+	"delaccount.html":  delaccounthtml,
 	"newaccount.html":  newaccounthtml,
+	"distribute.html":  distributehtml,
+	"login.html":       loginhtml,
+	"password.html":    passwordhtml,
+	"transaction.html": transactionhtml,
 	"app.js":           appjs,
 	"app.css":          appcss,
 }
 var embedType = map[string]string{
-	"login.html":       "text/html",
-	"transaction.html": "text/html",
-	"logout.html":      "text/html",
-	"password.html":    "text/html",
-	"distribute.html":  "text/html",
+	"deluser.html":     "text/html",
 	"newuser.html":     "text/html",
 	"index.html":       "text/html",
+	"logout.html":      "text/html",
+	"delaccount.html":  "text/html",
 	"newaccount.html":  "text/html",
+	"distribute.html":  "text/html",
+	"login.html":       "text/html",
+	"password.html":    "text/html",
+	"transaction.html": "text/html",
 	"app.js":           "application/javascript",
 	"app.css":          "text/css",
 }

@@ -195,7 +195,6 @@ function newUser() {
         contentType: "application/json",
         success: function () {
             $("#success").text("user " + user + " created");
-            updateUsers();
             // Clear the form. This seems a bit ugly but it doesn't make sense
             // to re-use usernames or passwords so I think it's justifiable,
             // and it saves having to retrigger validation when the user list
@@ -203,6 +202,26 @@ function newUser() {
             $("#user").val("");
             $("#password").val("");
             $("#password2").val("");
+            updateUsers();
+        },
+        error: ajaxFailed,
+    });
+    return false;
+}
+
+// Delete user page
+
+// delUser issues a user deletion request.
+function delUser() {
+    var user;
+    user = $("#user").val();
+    $.ajax({
+        method: "DELETE",
+        url: "/v1/user/" + user,
+        success: function () {
+            $("#success").text("user " + user + " deleted");
+            $("#user").val("");
+            updateUsers();
         },
         error: ajaxFailed,
     });
@@ -225,9 +244,28 @@ function newAccount() {
         contentType: "application/json",
         success: function () {
             $("#success").text("account " + account + " created");
-            updateAccounts();
             // Clear the form. See discussion in newUser.
             $("#account").val("");
+            updateAccounts();
+        },
+        error: ajaxFailed,
+    });
+    return false;
+}
+
+// Delete account page
+
+// delAccount issues an account deletion request.
+function delAccount() {
+    var account;
+    account = $("#account").val();
+    $.ajax({
+        method: "DELETE",
+        url: "/v1/account/" + account,
+        success: function () {
+            $("#success").text("account " + account + " deleted");
+            $("#account").val("");
+            updateAccounts();
         },
         error: ajaxFailed,
     });
@@ -349,7 +387,6 @@ function ajaxFailed(jqxhr, error, exception) {
 }
 
 // Initialization
-
 // initialize gets configuration and sets up everything that needs it.
 function initialize() {
     var u, a, c;
@@ -370,9 +407,9 @@ function initialize() {
     });
     $.when(u, a, c).done(function (ur, ar, cr) {
         var i, tr, select;
-        users = ur[0];
-        accounts = ar[0]
         config = cr[0];
+        newUsers(ur[0])
+        newAccounts(ar[0]);
         // Initialize the transactions table if present
         if ($("table.transactions").length > 0) {
             // Populate the balance columns
@@ -394,21 +431,55 @@ function initialize() {
             setInterval(transactionsRefresh, 10000);
             $("#more").on("click", transactionsMore);
         }
-        // Populate the account dropdowns
-        select = $("select.account,select.accounts");
-        for (i = 0; i < accounts.length; i++) {
-            select.append($("<option>").text(accounts[i]));
-        }
-        // If there is a house account it should be the default transaction origin
-        // for generic transactions; but we don't do this for the cooked transaction
-        // form.
-        if (accounts.includes(config["houseAccount"])) {
-            if (!$("select#origin").hasClass("human")) {
-                $("select#origin").val(config["houseAccount"]);
-            }
-        }
         initializeValidation();
     }).fail(ajaxFailed);
+}
+
+function updateAccounts() {
+    $.ajax({
+        url: "/v1/account/",
+        dataType: "json",
+        success: newAccounts,
+    });
+}
+
+function newAccounts(a) {
+    var i, select;
+    accounts = a;
+    // Populate the account dropdowns
+    select = $("select.account,select.accounts");
+    select.find('option').remove()
+    for (i = 0; i < accounts.length; i++) {
+        select.append($("<option>").text(accounts[i]));
+    }
+    // If there is a house account it should be the default transaction origin
+    // for generic transactions; but we don't do this for the cooked transaction
+    // form.
+    if (accounts.includes(config["houseAccount"])) {
+        if (!$("select#origin").hasClass("human")) {
+            $("select#origin").val(config["houseAccount"]);
+        }
+    }
+}
+
+function updateUsers() {
+    $.ajax({
+        url: "/v1/user/",
+        dataType: "json",
+        success: newUsers,
+    });
+}
+
+function newUsers(u) {
+    var i, select;
+    users = u;
+    // Populate the user dropdowns
+    select = $("select.user,select.users");
+    select.find('option').remove()
+    for (i = 0; i < users.length; i++) {
+        select.append($("<option>").text(users[i]));
+    }
+   
 }
 
 // initializeValidation sets up form validation logic
@@ -431,7 +502,9 @@ function initializeValidation() {
     $("form#cookedTransaction").on("submit", transactionsNew);
     $("form#distribute").on("submit", distribute);
     $("form#newuser").on("submit", newUser);
+    $("form#deluser").on("submit", delUser);
     $("form#newaccount").on("submit", newAccount);
+    $("form#delaccount").on("submit", delAccount);
     $("form#changepass").on("submit", changePassword);
     // Initial validation of forms
     $("form").each(function (i, f) {

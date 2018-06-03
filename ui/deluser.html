@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Change Password ({{.Title}})</title>
+    <title>New User ({{.Title}})</title>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="/app.js"></script>
@@ -38,35 +38,27 @@
         </div>
     </div>
 
-    <h1>{{.Title}}: Change Password</h1>
+    <h1>{{.Title}}: Delete User</h1>
 
-    <form id=changepass>
+    <form id=deluser>
         <table class=form>
             <tr>
-                <td>New password</td>
+                <td>User</td>
                 <td>
-                    <input id=password type=password autocomplete="new-password" value="" class="nonempty newpassword">
-                </td>
-                <td class=error></td>
-            </tr>
-            <tr>
-                <td>Confirm password</td>
-                <td>
-                    <input id=password2 type=password autocomplete="new-password" value="" class="nonempty newpassword">
+                    <select name="user" class="user" id=user></select>
                 </td>
                 <td class=error></td>
             </tr>
             <tr>
                 <td></td>
                 <td>
-                    <input type=submit value=Change class=submit>
+                    <input type=submit value=Delete class=submit>
                 </td>
                 <td id=error class=error></td>
                 <td id=success class=success></td>
             </tr>
         </table>
         <input name=token type=hidden value="{{.Token}}" id=token>
-        <input name=user type=hidden autocomplete="username" value="{{.User}}" id=user>
     </form>
 </body>
 

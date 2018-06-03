@@ -19,7 +19,7 @@ type Account struct {
 var ErrNoSuchAccount = errors.New("account does not exist")
 
 // ErrAccountHasBalance is returned when deleting a nonempty account.
-var ErrAccountHasBalance = errors.New("account has a nonzero nalance")
+var ErrAccountHasBalance = errors.New("account has a nonzero balance")
 
 // GetAccounts returns the list of account names.
 func GetAccounts(tx *sql.Tx) (accounts []string, err error) {
