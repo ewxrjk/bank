@@ -116,7 +116,7 @@ try:
     r = requests.put("http://%s/v1/config/" % address,
                      json={"Value": "gbtest.py", "Token": 'whatever'},
                      cookies=cookies)
-    assert r.status_code == 403
+    assert r.status_code == 405
     r = requests.put("http://%s/v1/config/" % address,
                      json={"Value": "gbtest.py", "Token": token},
                      cookies={'bank': 'whatever'})

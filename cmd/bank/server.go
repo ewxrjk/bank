@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"git.anjou.terraraq.org.uk/bank"
+	"git.anjou.terraraq.org.uk/bank/util"
 	"github.com/gorilla/handlers"
 	"github.com/spf13/cobra"
 	"html/template"
@@ -38,9 +39,10 @@ var serverCmd = &cobra.Command{
 		if err = setup(); err != nil {
 			return
 		}
-		for _, handler := range namespace {
-			http.Handle(handler.Path, handlers.LoggingHandler(os.Stderr, handler.Handler))
+		if err = namespace.Initialize(); err != nil {
+			return
 		}
+		http.Handle("/", handlers.LoggingHandler(os.Stderr, &namespace))
 		secure = serverCert != "" && serverKey != ""
 		if secure {
 			err = http.ListenAndServeTLS(serverAddress, serverCert, serverKey, nil)
@@ -51,20 +53,24 @@ var serverCmd = &cobra.Command{
 	},
 }
 
-type handlerPath struct {
-	Path    string
-	Handler http.HandlerFunc
-}
-
-var namespace = []handlerPath{
-	{"/v1/login", handleLogin},
-	{"/v1/logout", handleLogout},
-	{"/v1/user/", handleUser},
-	{"/v1/account/", handleAccount},
-	{"/v1/transaction/", handleTransaction},
-	{"/v1/distribute/", handleDistribute},
-	{"/v1/config/", handleConfig},
-	{"/", handleRoot},
+var namespace = util.HTTPNamespace{
+	Paths: []*util.HTTPPath{
+		{"POST", "^/v1/login$", handlePostLogin},
+		{"POST", "^/v1/logout$", handlePostLogout},
+		{"GET", "^/v1/user/?$", handleGetUser},
+		{"POST", "^/v1/user/?$", handlePostUser},
+		{"PUT", "^/v1/user/([^/]+)/password$", handlePutUserPassword},
+		{"DELETE", "^/v1/user/([^/]+)$", handleDeleteUser},
+		{"GET", "^/v1/account/?$", handleGetAccount},
+		{"POST", "^/v1/account/?$", handlePostAccount},
+		{"GET", "^/v1/transaction/?$", handleGetTransaction},
+		{"POST", "^/v1/transaction/?$", handlePostTransaction},
+		{"POST", "^/v1/distribute/?$", handlePostDistribute},
+		{"GET", "^/v1/config/?$", handleGetConfig},
+		{"GET", "^/v1/config/([^/]+)$", handleGetConfigKey},
+		{"PUT", "^/v1/config/([^/]+)$", handlePutConfigKey},
+		{"GET", "/^.*", handleGetRoot},
+	},
 }
 
 // Session handling
@@ -93,11 +99,7 @@ type LoginResponse struct {
 }
 
 // POST /v1/login/
-func handleLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "must use POST", http.StatusMethodNotAllowed)
-		return
-	}
+func handlePostLogin(w http.ResponseWriter, r *http.Request, matches []string) {
 	var jreq LoginRequest
 	var err error
 	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
@@ -131,15 +133,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   secure,
 	})
-	respond(w, &LoginResponse{token})
+	util.HTTPRespond(w, &LoginResponse{token})
 }
 
 // POST /v1/logout/
-func handleLogout(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "must use POST", http.StatusMethodNotAllowed)
-		return
-	}
+func handlePostLogout(w http.ResponseWriter, r *http.Request, matches []string) {
 	var c *http.Cookie
 	var err error
 	if c, err = r.Cookie(cookieName); err != nil {
@@ -190,23 +188,18 @@ func mustSession(w http.ResponseWriter, r *http.Request) (session *Session) {
 	return
 }
 
-func respond(w http.ResponseWriter, jres interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&jres)
-}
-
-// errorResponse issues an error response appropriate to err.
-func errorResponse(w http.ResponseWriter, err error, action string) {
-	log.Printf("%s: %v", action, err)
-	switch err {
-	case bank.ErrNoSuchUser, bank.ErrNoSuchConfig, bank.ErrNoSuchAccount,
-		bank.ErrUserExists, bank.ErrAccountExists,
-		bank.ErrInsufficientFunds, bank.ErrUnsuitableParties:
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	default:
-		http.Error(w, action, http.StatusInternalServerError)
+func handleGetUser(w http.ResponseWriter, r *http.Request, matches []string) {
+	var err error
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
 	}
+	var users []string
+	if users, err = b.GetUsers(); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot get users")
+		return
+	}
+	util.HTTPRespond(w, &users)
 }
 
 // NewUserRequest is the JSON request to create a new user.
@@ -216,106 +209,76 @@ type NewUserRequest struct {
 	Token    string
 }
 
+func handlePostUser(w http.ResponseWriter, r *http.Request, matches []string) {
+	var err error
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	var jreq NewUserRequest
+	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+		log.Printf("decoding JSON: %v", err)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if jreq.Token != session.token {
+		log.Printf("token mismatch")
+		http.Error(w, "inconsistent session", http.StatusForbidden)
+		return
+	}
+	if jreq.User == "" {
+		http.Error(w, "empty user name", http.StatusBadRequest)
+		return
+	}
+	if jreq.Password == "" {
+		http.Error(w, "empty password", http.StatusBadRequest)
+		return
+	}
+	if err = b.NewUser(jreq.User, jreq.Password); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot create user")
+		return
+	}
+	http.Error(w, "created user", http.StatusOK)
+}
+
 // ChangePasswordRequest is the JSON request to change a password.
 type ChangePasswordRequest struct {
 	Password string
 	Token    string
 }
 
-// GET /v1/user/
-// POST /v1/user/
-// PUT /v1/user/{user}/password
-// DELETE /v1/user/{user}
-func handleUser(w http.ResponseWriter, r *http.Request) {
+func handlePutUserPassword(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
 	}
-	bits := strings.Split(r.URL.Path[1:], "/") // "v1", "user", [user[, "password"]]
-	for bits[len(bits)-1] == "" {
-		bits = bits[0 : len(bits)-1]
+	var jreq ChangePasswordRequest
+	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+		log.Printf("decoding JSON: %v", err)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
 	}
-	switch len(bits) {
-	case 2:
-		switch r.Method {
-		case "POST":
-			var jreq NewUserRequest
-			if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-				log.Printf("decoding JSON: %v", err)
-				http.Error(w, "invalid request", http.StatusBadRequest)
-				return
-			}
-			if jreq.Token != session.token {
-				log.Printf("token mismatch")
-				http.Error(w, "inconsistent session", http.StatusForbidden)
-				return
-			}
-			if jreq.User == "" {
-				http.Error(w, "empty user name", http.StatusBadRequest)
-				return
-			}
-			if jreq.Password == "" {
-				http.Error(w, "empty password", http.StatusBadRequest)
-				return
-			}
-			if err = b.NewUser(jreq.User, jreq.Password); err != nil {
-				errorResponse(w, err, "cannot create user")
-				return
-			}
-			http.Error(w, "created user", http.StatusOK)
-		case "GET":
-			var users []string
-			if users, err = b.GetUsers(); err != nil {
-				errorResponse(w, err, "cannot get users")
-				return
-			}
-			respond(w, &users)
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-	case 3:
-		switch r.Method {
-		case "DELETE":
-			if err = b.DeleteUser(bits[2]); err != nil {
-				errorResponse(w, err, "cannot get users")
-				return
-			}
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-	case 4:
-		switch r.Method {
-		case "PUT":
-			if bits[3] != "password" {
-				http.Error(w, "not found", http.StatusNotFound)
-				return
-			}
-			var jreq ChangePasswordRequest
-			var err error
-			if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-				log.Printf("decoding JSON: %v", err)
-				http.Error(w, "invalid request", http.StatusBadRequest)
-				return
-			}
-			if jreq.Token != session.token {
-				log.Printf("token mismatch")
-				http.Error(w, "inconsistent session", http.StatusForbidden)
-				return
-			}
-			if err = b.SetPassword(bits[2], jreq.Password); err != nil {
-				errorResponse(w, err, "cannot set password")
-				return
-			}
-			http.Error(w, "changed password", http.StatusOK)
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-	default:
-		http.Error(w, "not found", http.StatusNotFound)
+	if jreq.Token != session.token {
+		log.Printf("token mismatch")
+		http.Error(w, "inconsistent session", http.StatusForbidden)
+		return
+	}
+	if err = b.SetPassword(matches[1], jreq.Password); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot set password")
+		return
+	}
+	http.Error(w, "changed password", http.StatusOK)
+}
+
+func handleDeleteUser(w http.ResponseWriter, r *http.Request, matches []string) {
+	var err error
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	if err = b.DeleteUser(matches[1]); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot delete user")
 		return
 	}
 }
@@ -326,45 +289,45 @@ type NewAccountRequest struct {
 	Token   string
 }
 
-// POST /v1/account/
-// GET /v1/account/
-func handleAccount(w http.ResponseWriter, r *http.Request) {
+func handlePostAccount(w http.ResponseWriter, r *http.Request, matches []string) {
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
 	}
+	var jreq NewAccountRequest
 	var err error
-	if r.Method == "POST" {
-		var jreq NewAccountRequest
-		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		if jreq.Token != session.token {
-			log.Printf("token mismatch")
-			http.Error(w, "inconsistent session", http.StatusForbidden)
-			return
-		}
-		if jreq.Account == "" {
-			http.Error(w, "empty account name", http.StatusBadRequest)
-			return
-		}
-		if err = b.NewAccount(jreq.Account); err != nil {
-			errorResponse(w, err, "cannot create account")
-			return
-		}
-		http.Error(w, "created account", http.StatusOK)
-	} else if r.Method == "GET" {
-		var accounts []string
-		if accounts, err = b.GetAccounts(); err != nil {
-			errorResponse(w, err, "getting accounts")
-			return
-		}
-		respond(w, &accounts)
-	} else {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+	if jreq.Token != session.token {
+		log.Printf("token mismatch")
+		http.Error(w, "inconsistent session", http.StatusForbidden)
+		return
+	}
+	if jreq.Account == "" {
+		http.Error(w, "empty account name", http.StatusBadRequest)
+		return
+	}
+	if err = b.NewAccount(jreq.Account); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot create account")
+		return
+	}
+	http.Error(w, "created account", http.StatusOK)
+}
+
+func handleGetAccount(w http.ResponseWriter, r *http.Request, matches []string) {
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	var accounts []string
+	var err error
+	if accounts, err = b.GetAccounts(); err != nil {
+		util.HTTPErrorResponse(w, err, "getting accounts")
+		return
+	}
+	util.HTTPRespond(w, &accounts)
 }
 
 // NewTransactionRequest is the JSON request to create a new transaction.
@@ -376,50 +339,50 @@ type NewTransactionRequest struct {
 	Amount      int
 }
 
-// POST /v1/transaction/
-// GET /v1/transaction/?limit=LIMIT&offset=OFFSET&after=AFTER
-func handleTransaction(w http.ResponseWriter, r *http.Request) {
+func handlePostTransaction(w http.ResponseWriter, r *http.Request, matches []string) {
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
 	}
 	var err error
-	if r.Method == "POST" {
-		var jreq NewTransactionRequest
-		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-			log.Printf("decoding JSON: %v", err)
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		if jreq.Token != session.token {
-			log.Printf("token mismatch")
-			http.Error(w, "inconsistent session", http.StatusForbidden)
-			return
-		}
-		if err = b.NewTransaction(session.user, jreq.Origin, jreq.Destination, jreq.Description, jreq.Amount); err != nil {
-			errorResponse(w, err, "cannot create transaction")
-			return
-		}
-		http.Error(w, "created transaction", http.StatusOK)
-	} else if r.Method == "GET" {
-		if err = r.ParseForm(); err != nil {
-			log.Printf("parsing query: %v", err)
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		limit, _ := strconv.Atoi(r.FormValue("limit"))
-		offset, _ := strconv.Atoi(r.FormValue("offset"))
-		after, _ := strconv.Atoi(r.FormValue("after"))
-		var transactions []bank.Transaction
-		if transactions, err = b.GetTransactions(limit, offset, after); err != nil {
-			errorResponse(w, err, "cannot get transactions")
-			return
-		}
-		respond(w, transactions)
-	} else {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	var jreq NewTransactionRequest
+	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+		log.Printf("decoding JSON: %v", err)
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+	if jreq.Token != session.token {
+		log.Printf("token mismatch")
+		http.Error(w, "inconsistent session", http.StatusForbidden)
+		return
+	}
+	if err = b.NewTransaction(session.user, jreq.Origin, jreq.Destination, jreq.Description, jreq.Amount); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot create transaction")
+		return
+	}
+	http.Error(w, "created transaction", http.StatusOK)
+}
+
+func handleGetTransaction(w http.ResponseWriter, r *http.Request, matches []string) {
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	var err error
+	if err = r.ParseForm(); err != nil {
+		log.Printf("parsing query: %v", err)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	limit, _ := strconv.Atoi(r.FormValue("limit"))
+	offset, _ := strconv.Atoi(r.FormValue("offset"))
+	after, _ := strconv.Atoi(r.FormValue("after"))
+	var transactions []bank.Transaction
+	if transactions, err = b.GetTransactions(limit, offset, after); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot get transactions")
+		return
+	}
+	util.HTTPRespond(w, transactions)
 }
 
 // DistributeRequest is the JSON request to create distribution transactions.
@@ -431,7 +394,7 @@ type DistributeRequest struct {
 }
 
 // POST /v1/distribute/
-func handleDistribute(w http.ResponseWriter, r *http.Request) {
+func handlePostDistribute(w http.ResponseWriter, r *http.Request, matches []string) {
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
@@ -449,7 +412,7 @@ func handleDistribute(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = b.Distribute(session.user, jreq.Origin, jreq.Destinations, jreq.Description); err != nil {
-			errorResponse(w, err, "cannot distribute")
+			util.HTTPErrorResponse(w, err, "cannot distribute")
 			return
 		}
 		http.Error(w, "distributed", http.StatusOK)
@@ -459,69 +422,68 @@ func handleDistribute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleGetConfig(w http.ResponseWriter, r *http.Request, matches []string) {
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	var configs map[string]string
+	var err error
+	if configs, err = b.GetConfigs(); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot get configuration item")
+		return
+	}
+	util.HTTPRespond(w, configs)
+}
+
+func handleGetConfigKey(w http.ResponseWriter, r *http.Request, matches []string) {
+	var session *Session
+	if session = mustSession(w, r); session == nil {
+		return
+	}
+	var value string
+	var err error
+	if value, err = b.GetConfig(matches[1]); err != nil {
+		if err == bank.ErrNoSuchConfig {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			log.Printf("getting configs: %v", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+		}
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(value))
+}
+
 // ConfigRequest is the JSON request to set a configuration item.
 type ConfigRequest struct {
 	Value string
 	Token string
 }
 
-// GET /v1/config/
-// GET /v1/config/KEY
-// PUT /v1/config/KEY
-func handleConfig(w http.ResponseWriter, r *http.Request) {
-	var err error
-	key := r.URL.Path[len("/v1/config/"):]
+func handlePutConfigKey(w http.ResponseWriter, r *http.Request, matches []string) {
 	var session *Session
 	if session = mustSession(w, r); session == nil {
 		return
 	}
-	if r.Method == "GET" {
-		if key != "" {
-			var value string
-			if value, err = b.GetConfig(key); err != nil {
-				if err == bank.ErrNoSuchConfig {
-					http.Error(w, err.Error(), http.StatusNotFound)
-				} else {
-					log.Printf("getting configs: %v", err)
-					http.Error(w, "internal error", http.StatusInternalServerError)
-				}
-				return
-			}
-			w.Header().Set("Content-Type", "text/plain")
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(value))
-		} else {
-			var configs map[string]string
-			if configs, err = b.GetConfigs(); err != nil {
-				errorResponse(w, err, "cannot get configuration item")
-				return
-			}
-			respond(w, configs)
-		}
-	} else if r.Method == "PUT" {
-		var jreq ConfigRequest
-		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		if jreq.Token != session.token {
-			log.Printf("token mismatch")
-			http.Error(w, "inconsistent session", http.StatusForbidden)
-			return
-		}
-		if key == "" {
-			http.Error(w, "missing key", http.StatusBadRequest)
-			return
-		}
-		if err = b.PutConfig(key, jreq.Value); err != nil {
-			errorResponse(w, err, "cannot set configuration item")
-			return
-		}
-		http.Error(w, "set configuration item", http.StatusOK)
-	} else {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	var jreq ConfigRequest
+	var err error
+	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+	if jreq.Token != session.token {
+		log.Printf("token mismatch")
+		http.Error(w, "inconsistent session", http.StatusForbidden)
+		return
+	}
+	if err = b.PutConfig(matches[1], jreq.Value); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot set configuration item")
+		return
+	}
+	http.Error(w, "set configuration item", http.StatusOK)
 }
 
 // embedTemplate is the map of paths to parsed templates.
@@ -543,7 +505,7 @@ type TemplateData struct {
 }
 
 // GET /
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
 	path := r.URL.Path[1:]
 	if path == "" {

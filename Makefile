@@ -6,7 +6,7 @@ INSTALL=install
 
 all: check
 
-bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) cmd/bank/ui.go vendor
+bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) $(wildcard */*.go) cmd/bank/ui.go vendor
 	go build -o $@ ./cmd/bank
 
 embed: $(wildcard cmd/embed/*.go) vendor
