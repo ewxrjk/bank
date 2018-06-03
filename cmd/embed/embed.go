@@ -100,7 +100,7 @@ func (e *embedContext) process(w io.Writer) (err error) {
 		return
 	}
 	col := 0
-	for _, r := range string(content) {
+	for _, r := range []byte(content) {
 		switch true {
 		case r == '"' || r == '\\':
 			if _, err = fmt.Fprintf(w, "\\%c", r); err != nil {
@@ -112,7 +112,7 @@ func (e *embedContext) process(w io.Writer) (err error) {
 				return
 			}
 			col = 0
-		case r < 32:
+		case r < 32 || r > 127:
 			if _, err = fmt.Fprintf(w, "\\x%02x", r); err != nil {
 				return
 			}

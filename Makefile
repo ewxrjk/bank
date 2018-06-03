@@ -19,7 +19,7 @@ check: bank
 vendor:
 	dep ensure
 
-EMBED=$(wildcard ui/*.html) ui/app.js ui/app.css
+EMBED=$(sort $(wildcard ui/*.html ui/*.png) ui/app.js ui/app.css)
 cmd/bank/ui.go: ${EMBED} Makefile embed
 	./embed -o $@ -p main ${EMBED}
 
