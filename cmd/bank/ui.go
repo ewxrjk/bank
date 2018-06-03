@@ -15,16 +15,35 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Login</h1>\n" +
 	"\n" +
 	"    <form id=login>\n" +
@@ -72,16 +91,35 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: New Transaction</h1>\n" +
 	"\n" +
 	"    <form id=newTransaction>\n" +
@@ -167,16 +205,35 @@ const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Logout</h1>\n" +
 	"\n" +
 	"    <p id=error class=error></p>\n" +
@@ -197,16 +254,35 @@ const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Change Password</h1>\n" +
 	"\n" +
 	"    <form id=changepass>\n" +
@@ -259,20 +335,39 @@ const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Distribute</h1>\n" +
 	"\n" +
 	"    <form id=distribute>\n" +
-	"        <table class=form>\n" +
+	"        <table  class=form>\n" +
 	"            <tr>\n" +
 	"                <td>Description</td>\n" +
 	"                <td>\n" +
@@ -348,16 +443,35 @@ const newuserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: New User</h1>\n" +
 	"\n" +
 	"    <form id=newuser>\n" +
@@ -416,16 +530,35 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: Transactions</h1>\n" +
 	"\n" +
 	"    <form id=cookedTransaction>\n" +
@@ -523,16 +656,35 @@ const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
-	"    <p>\n" +
-	"        <a href=\"/\">Transactions</a> |\n" +
-	"        <a href=\"/transaction.html\">New Transaction</a> |\n" +
-	"        <a href=\"/distribute.html\">Distribute</a> |\n" +
-	"        <a href=\"/newuser.html\">New User</a> |\n" +
-	"        <a href=\"/newaccount.html\">New Account</a> |\n" +
-	"        <a href=\"/password.html\">Change Password</a> |\n" +
-	"        <a id=logout href=\"/logout.html\">Logout</a>\n" +
-	"    </p>\n" +
-	"    <hr>\n" +
+	"    <div class=menu>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Transactions</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/\">Transactions</a> \n" +
+	"                <a href=\"/transaction.html\">New Transaction</a" +
+	">\n" +
+	"                <a href=\"/distribute.html\">Distribute</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Accounts</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                <a href=\"/newaccount.html\">New Account</a>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"        <div class=dropdown>\n" +
+	"            <button class=dropbtn>Users</button>\n" +
+	"            <div class=\"dropdown-content\">\n" +
+	"                    <a href=\"/newuser.html\">New User</a>\n" +
+	"                    <a href=\"/password.html\">Change Password</" +
+	"a>\n" +
+	"                    <a id=logout href=\"/logout.html\">Logout</a" +
+	">\n" +
+	"                </div>\n" +
+	"            </div>\n" +
+	"        </div>\n" +
+	"    </div>\n" +
+	"\n" +
 	"    <h1>{{.Title}}: New Account</h1>\n" +
 	"\n" +
 	"    <form id=newaccount>\n" +
@@ -1062,7 +1214,11 @@ const appjs = ("// Login page\n" +
 	"    $(\"a#logout\").on(\"click\", logout);\n" +
 	"});\n" +
 	"")
-const appcss = ("table.transactions { border-collapse: collapse }\n" +
+const appcss = ("body {\n" +
+	"    font-family: Liberation;\n" +
+	"    font-size: 12pt;\n" +
+	"}\n" +
+	"table.transactions { border-collapse: collapse }\n" +
 	"table.transactions td { border: 1px solid }\n" +
 	"td.time { text-align: right }\n" +
 	"td.id { text-align: right }\n" +
@@ -1070,6 +1226,64 @@ const appcss = ("table.transactions { border-collapse: collapse }\n" +
 	"td.balance_amount, th.balance { background-color: #e0ffff }\n" +
 	"td.error { color: red }\n" +
 	"td.success { color: green }\n" +
+	"\n" +
+	".menu {\n" +
+	"    background-color: black;\n" +
+	"    color: white;\n" +
+	"}\n" +
+	"/* Style The Dropdown Button */\n" +
+	".dropbtn {\n" +
+	"    background-color: black;\n" +
+	"    color: white;\n" +
+	"    padding: 6pt;\n" +
+	"    font-size: 12pt;\n" +
+	"    border: 0pt;\n" +
+	"    cursor: pointer;\n" +
+	"    font-family: Liberation;\n" +
+	"}\n" +
+	"\n" +
+	"/* The container <div> - needed to position the dropdown content" +
+	" */\n" +
+	".dropdown {\n" +
+	"    position: relative;\n" +
+	"    display: inline-block;\n" +
+	"}\n" +
+	"\n" +
+	"/* Dropdown Content (Hidden by Default) */\n" +
+	".dropdown-content {\n" +
+	"    display: none;\n" +
+	"    position: absolute;\n" +
+	"    background-color: black;\n" +
+	"    color: white;\n" +
+	"    min-width: 160px;\n" +
+	"    box-shadow: 0px 6pt 12pt 0px rgba(0,0,0,0.2);\n" +
+	"    z-index: 1;\n" +
+	"}\n" +
+	"\n" +
+	"/* Links inside the dropdown */\n" +
+	".dropdown-content a {\n" +
+	"    color: white;\n" +
+	"    padding: 6pt;\n" +
+	"    text-decoration: none;\n" +
+	"    display: block;\n" +
+	"}\n" +
+	"\n" +
+	"/* Change color of dropdown links on hover */\n" +
+	".dropdown-content a:hover {\n" +
+	"    background-color: #202020;\n" +
+	"}\n" +
+	"\n" +
+	"/* Show the dropdown menu on hover */\n" +
+	".dropdown:hover .dropdown-content {\n" +
+	"    display: block;\n" +
+	"}\n" +
+	"\n" +
+	"/* Change the background color of the dropdown button when the d" +
+	"ropdown content is shown */\n" +
+	".dropdown:hover .dropbtn {\n" +
+	"    color: white;\n" +
+	"    background-color: black;\n" +
+	"}\n" +
 	"")
 
 var embedContent = map[string]string{

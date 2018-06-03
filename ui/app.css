@@ -1,3 +1,7 @@
+body {
+    font-family: Liberation;
+    font-size: 12pt;
+}
 table.transactions { border-collapse: collapse }
 table.transactions td { border: 1px solid }
 td.time { text-align: right }
@@ -6,3 +10,59 @@ td.balance_amount, td.payment_amount { text-align: right }
 td.balance_amount, th.balance { background-color: #e0ffff }
 td.error { color: red }
 td.success { color: green }
+
+.menu {
+    background-color: black;
+    color: white;
+}
+/* Style The Dropdown Button */
+.dropbtn {
+    background-color: black;
+    color: white;
+    padding: 6pt;
+    font-size: 12pt;
+    border: 0pt;
+    cursor: pointer;
+    font-family: Liberation;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: black;
+    color: white;
+    min-width: 160px;
+    box-shadow: 0px 6pt 12pt 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: white;
+    padding: 6pt;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #202020;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    color: white;
+    background-color: black;
+}
