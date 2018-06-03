@@ -2,7 +2,7 @@ package util
 
 import (
 	"encoding/json"
-	"git.anjou.terraraq.org.uk/bank"
+	"github.com/ewxrjk/bank"
 	"log"
 	"net/http"
 	"regexp"

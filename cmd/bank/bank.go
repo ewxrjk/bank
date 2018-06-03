@@ -1,7 +1,7 @@
 package main
 
 import (
-	"git.anjou.terraraq.org.uk/bank"
+	"github.com/ewxrjk/bank"
 	"github.com/spf13/cobra"
 	"log"
 )
