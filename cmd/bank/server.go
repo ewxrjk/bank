@@ -70,7 +70,7 @@ var namespace = util.HTTPNamespace{
 		{"GET", "^/v1/config/?$", handleGetConfig},
 		{"GET", "^/v1/config/([^/]+)$", handleGetConfigKey},
 		{"PUT", "^/v1/config/([^/]+)$", handlePutConfigKey},
-		{"GET", "/^.*", handleGetRoot},
+		{"GET", "^/.*", handleGetRoot},
 	},
 }
 
