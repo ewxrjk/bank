@@ -653,7 +653,7 @@ const delaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"<html>\n" +
 	"\n" +
 	"<head>\n" +
-	"    <title>New User ({{.Title}})</title>\n" +
+	"    <title>Delete Account ({{.Title}})</title>\n" +
 	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
 	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
 	"\n" +
@@ -724,7 +724,7 @@ const deluserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
 	"<head>\n" +
-	"    <title>New User ({{.Title}})</title>\n" +
+	"    <title>Delete User ({{.Title}})</title>\n" +
 	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
 	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
 	"\n" +
