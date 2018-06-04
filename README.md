@@ -14,12 +14,14 @@ You will need:
 
 To build and self-test the software:
 
-    dep ensure
-    make
+    $ go get github.com/ewxrjk/bank
+    $ cd ${GOPATH:-$HOME/go}/src/github.com/ewxrjk/bank
+    $ dep ensure
+    $ make
 
 To install the `bank` command in `/usr/local/bin`:
 
-    sudo make install
+    $ sudo make install
 
 ## Database Setup
 
