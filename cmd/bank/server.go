@@ -506,6 +506,7 @@ func init() {
 	for name, content := range embedContent {
 		if embedType[name] == "text/html" {
 			embedTemplate[name] = template.Must(template.New(name).Parse(content))
+			embedType[name] = "text/html;charset=utf-8"
 		}
 	}
 }
