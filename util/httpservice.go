@@ -48,9 +48,13 @@ func (ns *HTTPNamespace) Initialize() (err error) {
 // ServeHTTP dispatches HTTP requests.
 func (ns *HTTPNamespace) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	notFoundError := http.StatusNotFound
+	method := r.Method
+	if method == "HEAD" {
+		method = "GET"
+	}
 	for i, path := range ns.Paths {
 		if matches := ns.regexps[i].FindStringSubmatch(r.URL.Path); matches != nil {
-			if path.Method == r.Method {
+			if path.Method == method {
 				path.ServeHTTP(w, r, matches)
 				return
 			} else {
