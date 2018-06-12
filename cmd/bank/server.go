@@ -2,9 +2,11 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/ewxrjk/bank"
 	"github.com/ewxrjk/bank/util"
 	"github.com/gorilla/handlers"
@@ -78,9 +80,17 @@ var namespace = util.HTTPNamespace{
 
 // Session defines a login session.
 type Session struct {
-	user    string
-	token   string
+	// User who may be logged in
+	user string
+
+	// Non-cookie coken
+	token string
+
+	// Epxiry time
 	expires time.Time
+
+	// Tag for cache (in)validation
+	tag string
 }
 
 var sessions = map[string]*Session{}
@@ -113,19 +123,19 @@ func handlePostLogin(w http.ResponseWriter, r *http.Request, matches []string) {
 		http.Error(w, "invalid credentials", http.StatusForbidden)
 		return
 	}
-	b := make([]byte, 36)
+	b := make([]byte, 3*18)
 	if _, err = rand.Read(b); err != nil {
 		log.Printf("rand.Read: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	var ident, token string
-	ident = base64.URLEncoding.EncodeToString(b[:18])
-	token = base64.URLEncoding.EncodeToString(b[18:])
+	ident := base64.URLEncoding.EncodeToString(b[:18])
+	token := base64.URLEncoding.EncodeToString(b[18:36])
+	tag := base64.URLEncoding.EncodeToString(b[36:])
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	expires := time.Now().Add(time.Hour * 8)
-	sessions[ident] = &Session{jreq.User, token, expires}
+	sessions[ident] = &Session{jreq.User, token, expires, tag}
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
 		Value:    ident,
@@ -502,8 +512,15 @@ func handlePutConfigKey(w http.ResponseWriter, r *http.Request, matches []string
 // embedTemplate is the map of paths to parsed templates.
 var embedTemplate = map[string]*template.Template{}
 
+// embedHashes is the map of fixed path to hashes.
+// For templates, it contains the hash of the template;
+// it can't be directly used as an entity tag.
+var embedHashes = map[string]string{}
+
 func init() {
 	for name, content := range embedContent {
+		hash := sha256.Sum256([]byte(content))
+		embedHashes[name] = base64.RawURLEncoding.EncodeToString(hash[:18])
 		if embedType[name] == "text/html" {
 			embedTemplate[name] = template.Must(template.New(name).Parse(content))
 			embedType[name] = "text/html;charset=utf-8"
@@ -525,34 +542,66 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if path == "" {
 		path = "index.html"
 	}
-	var content string
+	var content, weak, etag string
 	var ok bool
+	// Prepare the content and compute the etag
 	var template *template.Template
+	var data TemplateData
 	if template, ok = embedTemplate[path]; ok {
-		writer := strings.Builder{}
-		data := TemplateData{
-			Token: "not logged in",
-		}
+		data.Token = "not logged in"
 		if data.Title, err = b.GetConfig("title"); err != nil {
 			log.Printf("getting title: %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
+		// We exclude the title from the calculation of the tag,
+		// making it weak validator.
+		weak = "W/"
 		if session := getSession(w, r); session != nil {
 			data.Token = session.token
 			data.User = session.user
+			etag = embedHashes[path] + session.tag
+		} else {
+			etag = embedHashes[path]
 		}
+	} else if content, ok = embedContent[path]; ok {
+		etag = embedHashes[path]
+	} else {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	// Maybe the request is conditional
+	requestCondition := true
+	for _, h := range r.Header["If-None-Match"] {
+		var tags []util.EntityTag
+		if tags, err = util.ParseEntityTags(h); err != nil {
+			continue // ignore malformed headers
+		}
+		for _, tag := range tags {
+			if tag.All || etag == tag.Tag {
+				requestCondition = false
+				break
+			}
+		}
+	}
+	// Generate the content (if not static)
+	if requestCondition && template != nil {
+		writer := strings.Builder{}
 		if err = template.Execute(&writer, data); err != nil {
 			log.Printf("cannot serve page: executing template %s: %v", path, err)
 			http.Error(w, "cannot serve page", http.StatusInternalServerError)
 			return
 		}
 		content = writer.String()
-	} else if content, ok = embedContent[path]; !ok {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
 	}
 	w.Header().Set("Content-Type", embedType[path])
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(content))
+	if etag != "" {
+		w.Header().Set("ETag", fmt.Sprintf(`%s"%s"`, weak, etag))
+	}
+	if requestCondition {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		w.WriteHeader(http.StatusNotModified)
+	}
 }
