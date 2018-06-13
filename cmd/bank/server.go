@@ -22,11 +22,13 @@ import (
 )
 
 var serverAddress, serverKey, serverCert string
+var staticPageLifetime int
 
 func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
+	serverCmd.PersistentFlags().IntVarP(&staticPageLifetime, "lifetime", "L", 60, "static page lifetime")
 }
 
 var secure bool
@@ -476,6 +478,7 @@ func handleGetConfigKey(w http.ResponseWriter, r *http.Request, matches []string
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(value))
 }
@@ -595,6 +598,11 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 		content = writer.String()
 	}
 	w.Header().Set("Content-Type", embedType[path])
+	if template == nil {
+		w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", staticPageLifetime))
+	} else {
+		w.Header().Set("Cache-Control", "no-cache")
+	}
 	if etag != "" {
 		w.Header().Set("ETag", fmt.Sprintf(`%s"%s"`, weak, etag))
 	}

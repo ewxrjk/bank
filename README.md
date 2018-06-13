@@ -37,9 +37,9 @@ and located in the current directory:
 
 You will need to create an initial user:
 
-    $ bank -d bank.db user add rjk 
-    Enter password: 
-    Confirm password: 
+    $ bank -d bank.db user add rjk
+    Enter password:
+    Confirm password:
 
 You can create additional users at this stage,
 or via the web interface.
@@ -57,9 +57,19 @@ To run a server without TLS:
 
     $ bank -d bank.db server --address :8080
 
+### Caching
+
+You can use the `--lifetime` option to set the maximum caching period for static content
+(which currently means the CSS and JavaScript).
+The default is 60 seconds.
+For a production system, where these files may be unchanged for weeks or months on end,
+a larger value may be suitable.
+
+### TLS
+
 You can use the `--cert` and `--key` options to specify a TLS certificate and key.
 [Let's Encrypt](https://letsencrypt.org/) is the best way to acquire a certificate,
-but you can get started with a self-signed certificate as follows: 
+but you can get started with a self-signed certificate as follows:
 
     $ openssl req -new -newkey rsa:2048 -x509 -nodes -subj /CN=www.example.com -keyout key.pem -out cert.pem
     $ bank -d bank.db server --address :8080 --cert cert.pem --key key.pem

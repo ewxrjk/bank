@@ -68,6 +68,7 @@ func (ns *HTTPNamespace) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // HTTPRespond issue an HTTP response with JSON content.
 func HTTPRespond(w http.ResponseWriter, jres interface{}) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&jres)
 }
