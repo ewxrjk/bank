@@ -553,6 +553,7 @@ const appjs = ("// Login page\n" +
 	"            $(\"#more\").on(\"click\", transactionsMore);\n" +
 	"        }\n" +
 	"        initializeValidation();\n" +
+	"        initializeForms();\n" +
 	"    }).fail(ajaxFailed);\n" +
 	"}\n" +
 	"\n" +
@@ -602,7 +603,6 @@ const appjs = ("// Login page\n" +
 	"    for (i = 0; i < users.length; i++) {\n" +
 	"        select.append($(\"<option>\").text(users[i]));\n" +
 	"    }\n" +
-	"   \n" +
 	"}\n" +
 	"\n" +
 	"// initializeValidation sets up form validation logic\n" +
@@ -633,6 +633,19 @@ const appjs = ("// Login page\n" +
 	"    // Initial validation of forms\n" +
 	"    $(\"form\").each(function (i, f) {\n" +
 	"        validate($(f));\n" +
+	"    });\n" +
+	"}\n" +
+	"\n" +
+	"// initializeForms sets initial values for some of the forms.\n" +
+	"function initializeForms() {\n" +
+	"    // Default human is logged in user, if they have an account\n" +
+	"    $(\"select.human\").each(function(i, f) {\n" +
+	"        user=$(\"input#user\").val()\n" +
+	"        if (accounts.includes(user)) {\n" +
+	"            $(f).val(user)\n" +
+	"        } else {\n" +
+	"            $(f).val(\"\")\n" +
+	"        }\n" +
 	"    });\n" +
 	"}\n" +
 	"\n" +
@@ -1000,6 +1013,8 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        </table>\n" +
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
+	"        <input name=user type=hidden value=\"{{.User}}\" id=user" +
+	">\n" +
 	"    </form>\n" +
 	"\n" +
 	"    <hr>\n" +
@@ -1022,7 +1037,8 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"    <button id=more>More...</button>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +

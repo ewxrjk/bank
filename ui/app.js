@@ -432,6 +432,7 @@ function initialize() {
             $("#more").on("click", transactionsMore);
         }
         initializeValidation();
+        initializeForms();
     }).fail(ajaxFailed);
 }
 
@@ -479,7 +480,6 @@ function newUsers(u) {
     for (i = 0; i < users.length; i++) {
         select.append($("<option>").text(users[i]));
     }
-   
 }
 
 // initializeValidation sets up form validation logic
@@ -509,6 +509,19 @@ function initializeValidation() {
     // Initial validation of forms
     $("form").each(function (i, f) {
         validate($(f));
+    });
+}
+
+// initializeForms sets initial values for some of the forms.
+function initializeForms() {
+    // Default human is logged in user, if they have an account
+    $("select.human").each(function(i, f) {
+        user=$("input#user").val()
+        if (accounts.includes(user)) {
+            $(f).val(user)
+        } else {
+            $(f).val("")
+        }
     });
 }
 
