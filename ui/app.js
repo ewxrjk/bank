@@ -488,7 +488,7 @@ function newUsers(u) {
 function initializeValidation() {
     // Whenever any form is modified...
     $("form").each(function (i, f) {
-        $(f).find("input,select").on("input", function () {
+        $(f).find("input,select").on("input change", function () {
             // ...clear the error & success indicators
             $("#error").text("");
             $("#success").text("");

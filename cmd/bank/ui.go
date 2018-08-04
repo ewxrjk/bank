@@ -611,7 +611,8 @@ const appjs = ("// Login page\n" +
 	"function initializeValidation() {\n" +
 	"    // Whenever any form is modified...\n" +
 	"    $(\"form\").each(function (i, f) {\n" +
-	"        $(f).find(\"input,select\").on(\"input\", function () {\n" +
+	"        $(f).find(\"input,select\").on(\"input change\", functio" +
+	"n () {\n" +
 	"            // ...clear the error & success indicators\n" +
 	"            $(\"#error\").text(\"\");\n" +
 	"            $(\"#success\").text(\"\");\n" +
