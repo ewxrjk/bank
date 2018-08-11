@@ -1090,7 +1090,7 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"                <td>User name</td>\n" +
 	"                <td>\n" +
 	"                    <input id=user type=text autocomplete=userna" +
-	"me value=\"\" class=nonempty>\n" +
+	"me value=\"\">\n" +
 	"                </td>\n" +
 	"                <td class=error></td>\n" +
 	"            </tr>\n" +
@@ -1098,7 +1098,7 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"                <td>Password</td>\n" +
 	"                <td>\n" +
 	"                    <input id=password type=password autocomplet" +
-	"e=\"current-password\" value=\"\" class=nonempty>\n" +
+	"e=\"current-password\" value=\"\">\n" +
 	"                </td>\n" +
 	"                <td class=error></td>\n" +
 	"            </tr>\n" +
@@ -1114,7 +1114,8 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"    </form>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
