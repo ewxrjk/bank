@@ -10,6 +10,7 @@ td.balance_amount, td.payment_amount { text-align: right }
 td.balance_amount, th.balance { background-color: #e0ffff }
 td.error { color: red }
 td.success { color: green }
+p.project { text-align: right }
 
 .menu {
     background-color: black;

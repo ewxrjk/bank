@@ -13,6 +13,7 @@ const appcss = ("body {\n" +
 	"td.balance_amount, th.balance { background-color: #e0ffff }\n" +
 	"td.error { color: red }\n" +
 	"td.success { color: green }\n" +
+	"p.project { text-align: right }\n" +
 	"\n" +
 	".menu {\n" +
 	"    background-color: black;\n" +
@@ -730,6 +731,10 @@ const delaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -801,6 +806,10 @@ const deluserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -909,6 +918,10 @@ const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"        </tbody>\n" +
 	"    </table>\n" +
 	"    <button id=more>More...</button>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1036,6 +1049,10 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        </tbody>\n" +
 	"    </table>\n" +
 	"    <button id=more>More...</button>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -1112,6 +1129,10 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"            </tr>\n" +
 	"        </table>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -1161,6 +1182,10 @@ const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"    <h1>{{.Title}}: Logout</h1>\n" +
 	"\n" +
 	"    <p id=error class=error></p>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1230,6 +1255,10 @@ const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1316,6 +1345,10 @@ const newuserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        <input name=token type=hidden value=\"{{.Token}}\" id=to" +
 	"ken>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1396,6 +1429,10 @@ const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"        <input name=user type=hidden autocomplete=\"username\" v" +
 	"alue=\"{{.User}}\" id=user>\n" +
 	"    </form>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1509,6 +1546,10 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"        </tbody>\n" +
 	"    </table>\n" +
 	"    <button id=more>More...</button>\n" +
+	"\n" +
+	"    <hr>\n" +
+	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
+	"Bank</a></p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
