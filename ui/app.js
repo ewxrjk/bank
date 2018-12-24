@@ -142,7 +142,7 @@ function transactionsNew() {
             Origin: $("#origin").val(),
             Destination: $("#destination").val(),
             Description: $("#description").val(),
-            Amount: Number($("#amount").val()) * 100,
+            Amount: Math.round(Number($("#amount").val()) * 100),
         }),
         url: "/v1/transaction/",
         contentType: "application/json",
@@ -283,7 +283,7 @@ function changePassword() {
             Token: $("#token").val(),
             Password: $("#password").val(),
         }),
-        url: "/v1/user/" +$("#user").val() + "/password",
+        url: "/v1/user/" + $("#user").val() + "/password",
         contentType: "application/json",
         success: function () {
             $("#success").text("password changed");
@@ -515,8 +515,8 @@ function initializeValidation() {
 // initializeForms sets initial values for some of the forms.
 function initializeForms() {
     // Default human is logged in user, if they have an account
-    $("select.human").each(function(i, f) {
-        user=$("input#user").val()
+    $("select.human").each(function (i, f) {
+        user = $("input#user").val()
         if (accounts.includes(user)) {
             $(f).val(user)
         } else {

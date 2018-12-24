@@ -236,7 +236,8 @@ const appjs = ("// Login page\n" +
 	"            Origin: $(\"#origin\").val(),\n" +
 	"            Destination: $(\"#destination\").val(),\n" +
 	"            Description: $(\"#description\").val(),\n" +
-	"            Amount: Number($(\"#amount\").val()) * 100,\n" +
+	"            Amount: Math.round(Number($(\"#amount\").val()) * 10" +
+	"0),\n" +
 	"        }),\n" +
 	"        url: \"/v1/transaction/\",\n" +
 	"        contentType: \"application/json\",\n" +
@@ -384,7 +385,8 @@ const appjs = ("// Login page\n" +
 	"            Token: $(\"#token\").val(),\n" +
 	"            Password: $(\"#password\").val(),\n" +
 	"        }),\n" +
-	"        url: \"/v1/user/\" +$(\"#user\").val() + \"/password\",\n" +
+	"        url: \"/v1/user/\" + $(\"#user\").val() + \"/password\"," +
+	"\n" +
 	"        contentType: \"application/json\",\n" +
 	"        success: function () {\n" +
 	"            $(\"#success\").text(\"password changed\");\n" +
@@ -641,8 +643,8 @@ const appjs = ("// Login page\n" +
 	"// initializeForms sets initial values for some of the forms.\n" +
 	"function initializeForms() {\n" +
 	"    // Default human is logged in user, if they have an account\n" +
-	"    $(\"select.human\").each(function(i, f) {\n" +
-	"        user=$(\"input#user\").val()\n" +
+	"    $(\"select.human\").each(function (i, f) {\n" +
+	"        user = $(\"input#user\").val()\n" +
 	"        if (accounts.includes(user)) {\n" +
 	"            $(f).val(user)\n" +
 	"        } else {\n" +
