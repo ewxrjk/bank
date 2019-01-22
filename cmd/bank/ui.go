@@ -187,7 +187,7 @@ const appjs = ("// Login page\n" +
 	"    tr = $(\"<tr>\");\n" +
 	"    time = new Date(transaction[\"Time\"] * 1000)\n" +
 	"    time = (time.getUTCFullYear() + \"-\" + pad(time.getUTCMonth" +
-	"(), 2) + \"-\" + pad(time.getUTCDate(), 2)\n" +
+	"()+1, 2) + \"-\" + pad(time.getUTCDate(), 2)\n" +
 	"        + \" \" + pad(time.getUTCHours(), 2) + \":\" + pad(time." +
 	"getUTCMinutes(), 2) + \":\" + pad(time.getUTCSeconds(), 2))\n" +
 	"    td = $(\"<td>\").addClass(\"time\").text(time);\n" +

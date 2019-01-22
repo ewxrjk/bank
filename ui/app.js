@@ -103,7 +103,7 @@ function transactionToRow(transaction) {
     var tr, td, time, j
     tr = $("<tr>");
     time = new Date(transaction["Time"] * 1000)
-    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth(), 2) + "-" + pad(time.getUTCDate(), 2)
+    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth()+1, 2) + "-" + pad(time.getUTCDate(), 2)
         + " " + pad(time.getUTCHours(), 2) + ":" + pad(time.getUTCMinutes(), 2) + ":" + pad(time.getUTCSeconds(), 2))
     td = $("<td>").addClass("time").text(time);
     tr.append(td)
