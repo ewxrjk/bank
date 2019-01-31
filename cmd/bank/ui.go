@@ -736,7 +736,7 @@ const delaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -811,7 +811,7 @@ const deluserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -923,7 +923,7 @@ const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1054,7 +1054,7 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -1134,7 +1134,7 @@ const loginhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>\n" +
@@ -1187,7 +1187,7 @@ const logouthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1260,7 +1260,7 @@ const newaccounthtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1350,7 +1350,7 @@ const newuserhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1434,7 +1434,7 @@ const passwordhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")
@@ -1551,7 +1551,7 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
-	"Bank</a></p>\n" +
+	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
 	"</html>")

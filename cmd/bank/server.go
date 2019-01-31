@@ -7,10 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ewxrjk/bank"
-	"github.com/ewxrjk/bank/util"
-	"github.com/gorilla/handlers"
-	"github.com/spf13/cobra"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,6 +15,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ewxrjk/bank"
+	"github.com/ewxrjk/bank/util"
+	"github.com/gorilla/handlers"
+	"github.com/spf13/cobra"
 )
 
 var serverAddress, serverKey, serverCert string
@@ -533,9 +534,10 @@ func init() {
 
 // TemplateData is the data object type for template execution.
 type TemplateData struct {
-	Token string
-	Title string
-	User  string
+	Token   string
+	Title   string
+	User    string
+	Version string
 }
 
 // GET /
@@ -550,6 +552,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	// Prepare the content and compute the etag
 	var template *template.Template
 	var data TemplateData
+	data.Version = bank.Version
 	if template, ok = embedTemplate[path]; ok {
 		data.Token = "not logged in"
 		if data.Title, err = b.GetConfig("title"); err != nil {
