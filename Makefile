@@ -1,5 +1,6 @@
 bindir=/usr/local/bin
 INSTALL=install
+DEP=$(GOPATH)/bin/dep
 
 all: check
 
@@ -13,8 +14,8 @@ check: bank
 	go test -v ./...
 	./gbtest.py
 
-vendor:
-	dep ensure
+vendor: $(DEP)
+	$(DEP) ensure
 
 EMBED=$(sort $(wildcard ui/*.html ui/*.png) ui/app.js ui/app.css)
 cmd/bank/ui.go: ${EMBED} Makefile embed
@@ -25,6 +26,9 @@ version.go: scripts/make-version $(wildcard *.go) $(wildcard cmd/bank/*.go) $(wi
 
 install:
 	$(INSTALL) -m 555 bank $(bindir)/bank
+
+$(DEP):
+	go get -u github.com/golang/dep/cmd/dep
 
 clean:
 	rm -f bank embed

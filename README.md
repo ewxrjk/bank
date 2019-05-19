@@ -1,5 +1,7 @@
 # Description
 
+[![Build Status](https://travis-ci.org/ewxrjk/bank.svg?branch=master)](https://travis-ci.org/ewxrjk/bank)
+
 This is web application for tracking shared finances within a small, mutually trusting group.
 
 # Setup
