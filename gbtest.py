@@ -18,9 +18,9 @@ subprocess.check_call(["./bank", "-d", "_test.db",
                        "user", "add", "-p", "pass1", "fred"])
 
 # List users
-cp = subprocess.run(["./bank", "-d", "_test.db", "user", "list"], check=True, stdout=subprocess.PIPE, text=True)
-users = cp.stdout[:-1].split("\n")
-assert(users == ["fred"])
+cp = subprocess.run(["./bank", "-d", "_test.db", "user", "list"], check=True, stdout=subprocess.PIPE)
+users = cp.stdout[:-1].split(b"\n")
+assert(users == [b"fred"])
 
 # Change password
 subprocess.check_call(["./bank", "-d", "_test.db",
