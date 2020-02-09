@@ -1,3 +1,4 @@
+GOPATH:=$(shell go env GOPATH)
 bindir=/usr/local/bin
 INSTALL=install
 DEP=$(GOPATH)/bin/dep
