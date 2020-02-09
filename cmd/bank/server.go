@@ -24,10 +24,13 @@ import (
 
 var serverAddress, serverKey, serverCert string
 var staticPageLifetime int
+var debug bool
 
 func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
+	serverCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "log extra information for debugging (insecure)")
+	// see use sites for why debug is 'isnecure'
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
 	serverCmd.PersistentFlags().IntVarP(&staticPageLifetime, "lifetime", "L", 60, "static page lifetime")
 }
@@ -122,7 +125,13 @@ func handlePostLogin(w http.ResponseWriter, r *http.Request, matches []string) {
 		return
 	}
 	if err = b.CheckPassword(jreq.User, jreq.Password); err != nil {
-		log.Printf("CheckPassword for %v: %v", jreq.User, err)
+		// Sometimes passwords are accidentally entered into username fields,
+		// so don't log usernames unless debug is enabled.
+		if debug {
+			log.Printf("CheckPassword for %v: %v", jreq.User, err)
+		} else {
+			log.Printf("CheckPassword: %v", err)
+		}
 		http.Error(w, "invalid credentials", http.StatusForbidden)
 		return
 	}
@@ -182,12 +191,25 @@ func getSession(w http.ResponseWriter, r *http.Request) (session *Session) {
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	var ok bool
+	// Unrecognized and stale sessions should never become valid again,
+	// so should be harmless to log - nevertheless we hide them unless
+	// debug is enabled, in case something undermines our assumptions
+	// (e.g. VM snapshot restoration).
 	if session, ok = sessions[c.Value]; !ok {
-		log.Printf("session %v unrecognized", c.Value)
+		if debug {
+			log.Printf("session %v unrecognized", c.Value)
+		} else {
+			log.Printf("session unrecognized")
+		}
 		return
 	}
 	if time.Now().After(session.expires) {
-		log.Printf("session %v expired", c.Value)
+		if debug {
+			log.Printf("session %v expired", c.Value)
+		} else {
+			log.Printf("session expired")
+
+		}
 		delete(sessions, c.Value)
 		session = nil
 		return

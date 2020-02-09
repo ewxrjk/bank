@@ -166,5 +166,7 @@ The token is embedded into HTML pages
 and must be presented with all mutating operations.
 Non-mutating requests require only the cookie.
 
+Usernames and session IDs are only ever logged by the server if the `--debug` option is used.
+
 The JavaScript UI uses [jQuery](https://jquery.com/) heavily.
 It constrains the jQuery code using sub-resource integrity.
