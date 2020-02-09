@@ -3,12 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sort"
+
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	configCmd.AddCommand(configPutCmd)
 	configCmd.AddCommand(configGetCmd)
+	configCmd.AddCommand(configListCmd)
+	configCmd.AddCommand(configPutCmd)
 }
 
 var configCmd = &cobra.Command{
@@ -31,6 +34,32 @@ var configGetCmd = &cobra.Command{
 			return
 		}
 		fmt.Printf("%s\n", value)
+		return
+	},
+}
+
+var configListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list current configuration",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		if err = setup(); err != nil {
+			return
+		}
+		var config map[string]string
+		if config, err = b.GetConfigs(); err != nil {
+			return
+		}
+		keys := make([]string, 0, len(config))
+		for k := range config {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			if _, err = fmt.Printf("%s=%s\n", k, config[k]); err != nil {
+				return
+			}
+		}
 		return
 	},
 }
