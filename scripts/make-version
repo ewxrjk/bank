@@ -3,4 +3,5 @@ set -e
 version=$(git describe --tags --dirty)
 echo "package bank"
 echo
+echo "// Version is the version string of the program"
 echo "var Version = \"$version\""
