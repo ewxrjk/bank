@@ -92,7 +92,7 @@ type Session struct {
 	// Non-cookie coken
 	token string
 
-	// Epxiry time
+	// Expiry time
 	expires time.Time
 
 	// Tag for cache (in)validation
@@ -110,7 +110,7 @@ type LoginRequest struct {
 	Password string
 }
 
-// LoginResponse is  the JSON respons for a succesful login
+// LoginResponse is  the JSON response for a succesful login
 type LoginResponse struct {
 	Token string
 }
