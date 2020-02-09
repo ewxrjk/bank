@@ -64,22 +64,86 @@ var serverCmd = &cobra.Command{
 
 var namespace = util.HTTPNamespace{
 	Paths: []*util.HTTPPath{
-		{"POST", "^/v1/login$", handlePostLogin},
-		{"POST", "^/v1/logout$", handlePostLogout},
-		{"GET", "^/v1/user/?$", handleGetUser},
-		{"POST", "^/v1/user/?$", handlePostUser},
-		{"PUT", "^/v1/user/([^/]+)/password$", handlePutUserPassword},
-		{"DELETE", "^/v1/user/([^/]+)$", handleDeleteUser},
-		{"GET", "^/v1/account/?$", handleGetAccount},
-		{"POST", "^/v1/account/?$", handlePostAccount},
-		{"DELETE", "^/v1/account/([^/]+)$", handleDeleteAccount},
-		{"GET", "^/v1/transaction/?$", handleGetTransaction},
-		{"POST", "^/v1/transaction/?$", handlePostTransaction},
-		{"POST", "^/v1/distribute/?$", handlePostDistribute},
-		{"GET", "^/v1/config/?$", handleGetConfig},
-		{"GET", "^/v1/config/([^/]+)$", handleGetConfigKey},
-		{"PUT", "^/v1/config/([^/]+)$", handlePutConfigKey},
-		{"GET", "^/.*", handleGetRoot},
+		{
+			Method:    "POST",
+			Path:      "^/v1/login$",
+			ServeHTTP: handlePostLogin,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/logout$",
+			ServeHTTP: handlePostLogout,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/user/?$",
+			ServeHTTP: handleGetUser,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/user/?$",
+			ServeHTTP: handlePostUser,
+		},
+		{
+			Method:    "PUT",
+			Path:      "^/v1/user/([^/]+)/password$",
+			ServeHTTP: handlePutUserPassword,
+		},
+		{
+			Method:    "DELETE",
+			Path:      "^/v1/user/([^/]+)$",
+			ServeHTTP: handleDeleteUser,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/account/?$",
+			ServeHTTP: handleGetAccount,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/account/?$",
+			ServeHTTP: handlePostAccount,
+		},
+		{
+			Method:    "DELETE",
+			Path:      "^/v1/account/([^/]+)$",
+			ServeHTTP: handleDeleteAccount,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/transaction/?$",
+			ServeHTTP: handleGetTransaction,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/transaction/?$",
+			ServeHTTP: handlePostTransaction,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/distribute/?$",
+			ServeHTTP: handlePostDistribute,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/config/?$",
+			ServeHTTP: handleGetConfig,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/config/([^/]+)$",
+			ServeHTTP: handleGetConfigKey,
+		},
+		{
+			Method:    "PUT",
+			Path:      "^/v1/config/([^/]+)$",
+			ServeHTTP: handlePutConfigKey,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/.*",
+			ServeHTTP: handleGetRoot,
+		},
 	},
 }
 
