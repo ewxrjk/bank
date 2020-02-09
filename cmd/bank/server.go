@@ -356,10 +356,6 @@ type DistributeRequest struct {
 
 // POST /v1/distribute/
 func handlePostDistribute(w http.ResponseWriter, r *http.Request, matches []string) {
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	var err error
 	var jreq DistributeRequest
 	var session *Session
