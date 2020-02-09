@@ -151,6 +151,7 @@ function transactionsNew() {
             $("#success").text("transaction created");
             $("#description").val("")
             $("#amount").val("")
+            validateAll()
 
         },
         error: ajaxFailed,
@@ -206,6 +207,7 @@ function newUser() {
             $("#password").val("");
             $("#password2").val("");
             updateUsers();
+            validateAll()
         },
         error: ajaxFailed,
     });
@@ -290,6 +292,9 @@ function changePassword() {
         contentType: "application/json",
         success: function () {
             $("#success").text("password changed");
+            $("#password").val("");
+            $("#password2").val("");
+            validateAll()
         },
         error: ajaxFailed,
     });
@@ -372,6 +377,13 @@ function validate(container) {
         }
     })
     container.find(".submit").prop("disabled", !valid);
+}
+
+// validateAll revalidates all forms on the page
+function validateAll() {
+    $("form").each(function (i, f) {
+        validate($(f));
+    });
 }
 
 // Error handling
@@ -510,9 +522,7 @@ function initializeValidation() {
     $("form#delaccount").on("submit", delAccount);
     $("form#changepass").on("submit", changePassword);
     // Initial validation of forms
-    $("form").each(function (i, f) {
-        validate($(f));
-    });
+    validateAll()
 }
 
 // initializeForms sets initial values for some of the forms.

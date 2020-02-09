@@ -255,6 +255,7 @@ const appjs = ("// Login page\n" +
 	"            $(\"#success\").text(\"transaction created\");\n" +
 	"            $(\"#description\").val(\"\")\n" +
 	"            $(\"#amount\").val(\"\")\n" +
+	"            validateAll()\n" +
 	"\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
@@ -314,6 +315,7 @@ const appjs = ("// Login page\n" +
 	"            $(\"#password\").val(\"\");\n" +
 	"            $(\"#password2\").val(\"\");\n" +
 	"            updateUsers();\n" +
+	"            validateAll()\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
 	"    });\n" +
@@ -402,6 +404,9 @@ const appjs = ("// Login page\n" +
 	"        contentType: \"application/json\",\n" +
 	"        success: function () {\n" +
 	"            $(\"#success\").text(\"password changed\");\n" +
+	"            $(\"#password\").val(\"\");\n" +
+	"            $(\"#password2\").val(\"\");\n" +
+	"            validateAll()\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
 	"    });\n" +
@@ -495,6 +500,13 @@ const appjs = ("// Login page\n" +
 	"        }\n" +
 	"    })\n" +
 	"    container.find(\".submit\").prop(\"disabled\", !valid);\n" +
+	"}\n" +
+	"\n" +
+	"// validateAll revalidates all forms on the page\n" +
+	"function validateAll() {\n" +
+	"    $(\"form\").each(function (i, f) {\n" +
+	"        validate($(f));\n" +
+	"    });\n" +
 	"}\n" +
 	"\n" +
 	"// Error handling\n" +
@@ -647,9 +659,7 @@ const appjs = ("// Login page\n" +
 	"    $(\"form#delaccount\").on(\"submit\", delAccount);\n" +
 	"    $(\"form#changepass\").on(\"submit\", changePassword);\n" +
 	"    // Initial validation of forms\n" +
-	"    $(\"form\").each(function (i, f) {\n" +
-	"        validate($(f));\n" +
-	"    });\n" +
+	"    validateAll()\n" +
 	"}\n" +
 	"\n" +
 	"// initializeForms sets initial values for some of the forms.\n" +
