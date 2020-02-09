@@ -2,6 +2,7 @@ body {
     font-family: Liberation;
     font-size: 12pt;
 }
+div.transactions { width: max-content }
 table.transactions { border-collapse: collapse }
 table.transactions td { border: 1px solid }
 td.time { text-align: right }
@@ -11,6 +12,14 @@ td.balance_amount, th.balance { background-color: #e0ffff }
 td.error { color: red }
 td.success { color: green }
 p.project { text-align: right }
+
+button#more { 
+    width: 100%;
+    border: none;
+    padding: 4px;
+    background-color: #c0c0c0;
+    color: black
+}
 
 .menu {
     background-color: black;

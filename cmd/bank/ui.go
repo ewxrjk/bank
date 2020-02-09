@@ -5,6 +5,7 @@ const appcss = ("body {\n" +
 	"    font-family: Liberation;\n" +
 	"    font-size: 12pt;\n" +
 	"}\n" +
+	"div.transactions { width: max-content }\n" +
 	"table.transactions { border-collapse: collapse }\n" +
 	"table.transactions td { border: 1px solid }\n" +
 	"td.time { text-align: right }\n" +
@@ -14,6 +15,14 @@ const appcss = ("body {\n" +
 	"td.error { color: red }\n" +
 	"td.success { color: green }\n" +
 	"p.project { text-align: right }\n" +
+	"\n" +
+	"button#more { \n" +
+	"    width: 100%;\n" +
+	"    border: none;\n" +
+	"    padding: 4px;\n" +
+	"    background-color: #c0c0c0;\n" +
+	"    color: black\n" +
+	"}\n" +
 	"\n" +
 	".menu {\n" +
 	"    background-color: black;\n" +
@@ -821,10 +830,9 @@ const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"\n" +
 	"<head>\n" +
 	"    <title>Distribute ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"\n" +
+	"        integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8Qtmk" +
+	"MRdAu8=\" crossorigin=\"anonymous\"></script>\n" +
 	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
 	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
 	"</head>\n" +
@@ -904,38 +912,40 @@ const distributehtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
 	"\n" +
 	"    <hr>\n" +
 	"\n" +
-	"    <table class=transactions>\n" +
-	"        <thead>\n" +
-	"            <tr>\n" +
-	"                <th>Time</th>\n" +
-	"                <th>ID</th>\n" +
-	"                <th>User</th>\n" +
-	"                <th>Description</th>\n" +
-	"                <th>Amount</th>\n" +
-	"                <th>From</th>\n" +
-	"                <th>To</th>\n" +
-	"            </tr>\n" +
-	"        </thead>\n" +
-	"        <tbody>\n" +
-	"        </tbody>\n" +
-	"    </table>\n" +
-	"    <button id=more>More...</button>\n" +
+	"    <div class=transactions>\n" +
+	"        <table class=transactions>\n" +
+	"            <thead>\n" +
+	"                <tr>\n" +
+	"                    <th>Time</th>\n" +
+	"                    <th>ID</th>\n" +
+	"                    <th>User</th>\n" +
+	"                    <th>Description</th>\n" +
+	"                    <th>Amount</th>\n" +
+	"                    <th>From</th>\n" +
+	"                    <th>To</th>\n" +
+	"                </tr>\n" +
+	"            </thead>\n" +
+	"            <tbody>\n" +
+	"            </tbody>\n" +
+	"        </table>\n" +
+	"        <button id=more>More...</button>\n" +
+	"    </div>\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
 	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"<html>\n" +
 	"\n" +
 	"<head>\n" +
 	"    <title>Transactions ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"\n" +
+	"        integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8Qtmk" +
+	"MRdAu8=\" crossorigin=\"anonymous\"></script>\n" +
 	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
 	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
 	"</head>\n" +
@@ -1035,22 +1045,24 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"\n" +
 	"    <hr>\n" +
 	"\n" +
-	"    <table class=transactions>\n" +
-	"        <thead>\n" +
-	"            <tr>\n" +
-	"                <th>Time</th>\n" +
-	"                <th>ID</th>\n" +
-	"                <th>User</th>\n" +
-	"                <th>Description</th>\n" +
-	"                <th>Amount</th>\n" +
-	"                <th>From</th>\n" +
-	"                <th>To</th>\n" +
-	"            </tr>\n" +
-	"        </thead>\n" +
-	"        <tbody>\n" +
-	"        </tbody>\n" +
-	"    </table>\n" +
-	"    <button id=more>More...</button>\n" +
+	"    <div class=transactions>\n" +
+	"        <table class=transactions>\n" +
+	"            <thead>\n" +
+	"                <tr>\n" +
+	"                    <th>Time</th>\n" +
+	"                    <th>ID</th>\n" +
+	"                    <th>User</th>\n" +
+	"                    <th>Description</th>\n" +
+	"                    <th>Amount</th>\n" +
+	"                    <th>From</th>\n" +
+	"                    <th>To</th>\n" +
+	"                </tr>\n" +
+	"            </thead>\n" +
+	"            <tbody>\n" +
+	"            </tbody>\n" +
+	"        </table>\n" +
+	"        <button id=more>More...</button>\n" +
+	"    </div>\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
@@ -1443,10 +1455,9 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"\n" +
 	"<head>\n" +
 	"    <title>New Transaction ({{.Title}})</title>\n" +
-	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" " +
-	"integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"" +
-	"\n" +
-	"        crossorigin=\"anonymous\"></script>\n" +
+	"    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\"\n" +
+	"        integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8Qtmk" +
+	"MRdAu8=\" crossorigin=\"anonymous\"></script>\n" +
 	"    <script type=\"text/javascript\" src=\"/app.js\"></script>\n" +
 	"    <link rel=StyleSheet type=\"text/css\" href=\"/app.css\">\n" +
 	"</head>\n" +
@@ -1532,29 +1543,32 @@ const transactionhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n
 	"\n" +
 	"    <hr>\n" +
 	"\n" +
-	"    <table class=transactions>\n" +
-	"        <thead>\n" +
-	"            <tr>\n" +
-	"                <th>Time</th>\n" +
-	"                <th>ID</th>\n" +
-	"                <th>User</th>\n" +
-	"                <th>Description</th>\n" +
-	"                <th>Amount</th>\n" +
-	"                <th>From</th>\n" +
-	"                <th>To</th>\n" +
-	"            </tr>\n" +
-	"        </thead>\n" +
-	"        <tbody>\n" +
-	"        </tbody>\n" +
-	"    </table>\n" +
-	"    <button id=more>More...</button>\n" +
+	"    <div class=transactions>\n" +
+	"        <table class=transactions>\n" +
+	"            <thead>\n" +
+	"                <tr>\n" +
+	"                    <th>Time</th>\n" +
+	"                    <th>ID</th>\n" +
+	"                    <th>User</th>\n" +
+	"                    <th>Description</th>\n" +
+	"                    <th>Amount</th>\n" +
+	"                    <th>From</th>\n" +
+	"                    <th>To</th>\n" +
+	"                </tr>\n" +
+	"            </thead>\n" +
+	"            <tbody>\n" +
+	"            </tbody>\n" +
+	"        </table>\n" +
+	"        <button id=more>More...</button>\n" +
+	"    </div>\n" +
 	"\n" +
 	"    <hr>\n" +
 	"    <p class=project><a href=\"https://github.com/ewxrjk/bank\">" +
 	"Bank</a> ({{.Version}})</p>\n" +
 	"</body>\n" +
 	"\n" +
-	"</html>")
+	"</html>\n" +
+	"")
 
 var embedContent = map[string]string{
 	"app.css":          appcss,
