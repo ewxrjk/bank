@@ -196,7 +196,7 @@ const appjs = ("// Login page\n" +
 	"    tr = $(\"<tr>\");\n" +
 	"    time = new Date(transaction[\"Time\"] * 1000)\n" +
 	"    time = (time.getUTCFullYear() + \"-\" + pad(time.getUTCMonth" +
-	"()+1, 2) + \"-\" + pad(time.getUTCDate(), 2)\n" +
+	"() + 1, 2) + \"-\" + pad(time.getUTCDate(), 2)\n" +
 	"        + \" \" + pad(time.getUTCHours(), 2) + \":\" + pad(time." +
 	"getUTCMinutes(), 2) + \":\" + pad(time.getUTCSeconds(), 2))\n" +
 	"    td = $(\"<td>\").addClass(\"time\").text(time);\n" +
@@ -236,7 +236,7 @@ const appjs = ("// Login page\n" +
 	"\n" +
 	"// New transactions page\n" +
 	"\n" +
-	"// newTransaction issues a transaction creation request.\n" +
+	"// transactionsNew issues a transaction creation request.\n" +
 	"function transactionsNew() {\n" +
 	"    $.ajax({\n" +
 	"        method: \"POST\",\n" +
@@ -253,6 +253,9 @@ const appjs = ("// Login page\n" +
 	"        success: function () {\n" +
 	"            transactionsRefresh();\n" +
 	"            $(\"#success\").text(\"transaction created\");\n" +
+	"            $(\"#description\").val(\"\")\n" +
+	"            $(\"#amount\").val(\"\")\n" +
+	"\n" +
 	"        },\n" +
 	"        error: ajaxFailed,\n" +
 	"    });\n" +

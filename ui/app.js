@@ -103,7 +103,7 @@ function transactionToRow(transaction) {
     var tr, td, time, j
     tr = $("<tr>");
     time = new Date(transaction["Time"] * 1000)
-    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth()+1, 2) + "-" + pad(time.getUTCDate(), 2)
+    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth() + 1, 2) + "-" + pad(time.getUTCDate(), 2)
         + " " + pad(time.getUTCHours(), 2) + ":" + pad(time.getUTCMinutes(), 2) + ":" + pad(time.getUTCSeconds(), 2))
     td = $("<td>").addClass("time").text(time);
     tr.append(td)
@@ -133,7 +133,7 @@ function transactionToRow(transaction) {
 
 // New transactions page
 
-// newTransaction issues a transaction creation request.
+// transactionsNew issues a transaction creation request.
 function transactionsNew() {
     $.ajax({
         method: "POST",
@@ -149,6 +149,9 @@ function transactionsNew() {
         success: function () {
             transactionsRefresh();
             $("#success").text("transaction created");
+            $("#description").val("")
+            $("#amount").val("")
+
         },
         error: ajaxFailed,
     });
