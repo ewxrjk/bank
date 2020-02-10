@@ -429,18 +429,26 @@ const appjs = ("// Login page\n" +
 	"    var valid;\n" +
 	"    // Adjust the cooked transaction form.\n" +
 	"    if ($(\"select#reason\").val() == \"house\") {\n" +
+	"        // Set up the form to be a payment from house to someone" +
+	" else.\n" +
+	"        // This should only be reachable if the house account ex" +
+	"ists\n" +
+	"        // (see newAccounts).\n" +
 	"        $(\"#originRow\").hide();\n" +
-	"        $(\"#origin\").val(config[\"houseAccount\"]); // TODO as" +
-	"sumed to exist\n" +
+	"        $(\"#origin\").val(config[\"houseAccount\"]);\n" +
 	"        $(\"#origin\").removeClass(\"human\");\n" +
 	"    } else if ($(\"select#reason\").val() == \"payback\") {\n" +
 	"        $(\"#originRow\").show();\n" +
 	"        $(\"#origin\").addClass(\"human\");\n" +
 	"    }\n" +
+	"    // Clear all the error indicators\n" +
 	"    valid = true;\n" +
 	"    container.find('td.error').text('');\n" +
+	"    // Iterate over the inputs in turn\n" +
 	"    container.find('input,select').each(function (i, e) {\n" +
 	"        var j, newpasswords, trouble;\n" +
+	"        // Only validate an input if all the previous ones were " +
+	"good\n" +
 	"        if (valid) {\n" +
 	"            e = $(e)\n" +
 	"            if (e.hasClass('nonempty') && e.val() == \"\") {\n" +
@@ -496,9 +504,12 @@ const appjs = ("// Login page\n" +
 	"                    }\n" +
 	"                });\n" +
 	"            }\n" +
+	"            // If there was a problem display it next to the inp" +
+	"ut\n" +
 	"            e.parent().next().text(trouble);\n" +
 	"        }\n" +
 	"    })\n" +
+	"    // Only allow submission if all the inputs are valid\n" +
 	"    container.find(\".submit\").prop(\"disabled\", !valid);\n" +
 	"}\n" +
 	"\n" +
@@ -607,9 +618,15 @@ const appjs = ("// Login page\n" +
 	"oked transaction\n" +
 	"    // form.\n" +
 	"    if (accounts.includes(config[\"houseAccount\"])) {\n" +
+	"        $(\"#selectHouse\").removeAttr('disabled')\n" +
 	"        if (!$(\"select#origin\").hasClass(\"human\")) {\n" +
 	"            $(\"select#origin\").val(config[\"houseAccount\"]);\n" +
 	"        }\n" +
+	"    } else {\n" +
+	"        // No house account. Disabled shared resource transactio" +
+	"ns.\n" +
+	"        $(\"#selectHouse\").attr('disabled', 'disabled')\n" +
+	"        $(\"select#reason\").val('payback')\n" +
 	"    }\n" +
 	"}\n" +
 	"\n" +
@@ -1000,10 +1017,10 @@ const indexhtml = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n" +
 	"                <td>What happened</td>\n" +
 	"                <td>\n" +
 	"                    <select name=\"reason\" id=reason>\n" +
-	"                        <option value=house selected>Bought a sh" +
-	"ared resource</option>\n" +
-	"                        <option value=payback>Repaid another par" +
-	"ty</option>\n" +
+	"                        <option id=selectHouse value=house selec" +
+	"ted>Bought a shared resource</option>\n" +
+	"                        <option id=selectPayback value=payback>R" +
+	"epaid another party</option>\n" +
 	"                    </select>\n" +
 	"                </td>\n" +
 	"                <td class=error></td>\n" +

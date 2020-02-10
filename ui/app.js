@@ -316,17 +316,23 @@ function validate(container) {
     var valid;
     // Adjust the cooked transaction form.
     if ($("select#reason").val() == "house") {
+        // Set up the form to be a payment from house to someone else.
+        // This should only be reachable if the house account exists
+        // (see newAccounts).
         $("#originRow").hide();
-        $("#origin").val(config["houseAccount"]); // TODO assumed to exist
+        $("#origin").val(config["houseAccount"]);
         $("#origin").removeClass("human");
     } else if ($("select#reason").val() == "payback") {
         $("#originRow").show();
         $("#origin").addClass("human");
     }
+    // Clear all the error indicators
     valid = true;
     container.find('td.error').text('');
+    // Iterate over the inputs in turn
     container.find('input,select').each(function (i, e) {
         var j, newpasswords, trouble;
+        // Only validate an input if all the previous ones were good
         if (valid) {
             e = $(e)
             if (e.hasClass('nonempty') && e.val() == "") {
@@ -373,9 +379,11 @@ function validate(container) {
                     }
                 });
             }
+            // If there was a problem display it next to the input
             e.parent().next().text(trouble);
         }
     })
+    // Only allow submission if all the inputs are valid
     container.find(".submit").prop("disabled", !valid);
 }
 
@@ -472,9 +480,14 @@ function newAccounts(a) {
     // for generic transactions; but we don't do this for the cooked transaction
     // form.
     if (accounts.includes(config["houseAccount"])) {
+        $("#selectHouse").removeAttr('disabled')
         if (!$("select#origin").hasClass("human")) {
             $("select#origin").val(config["houseAccount"]);
         }
+    } else {
+        // No house account. Disabled shared resource transactions.
+        $("#selectHouse").attr('disabled', 'disabled')
+        $("select#reason").val('payback')
     }
 }
 
