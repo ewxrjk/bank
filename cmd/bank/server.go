@@ -3,14 +3,18 @@ package main
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"embed"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
+	"mime"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -521,13 +525,35 @@ var embedTemplate = map[string]*template.Template{}
 // it can't be directly used as an entity tag.
 var embedHashes = map[string]string{}
 
+// embedType is the map of fixed paths to content types.
+var embedType = map[string]string{}
+
 func init() {
-	for name, content := range embedContent {
-		hash := sha256.Sum256([]byte(content))
-		embedHashes[name] = base64.RawURLEncoding.EncodeToString(hash[:18])
-		if embedType[name] == "text/html" {
-			embedTemplate[name] = template.Must(template.New(name).Parse(content))
-			embedType[name] = "text/html;charset=utf-8"
+	initializeTags("ui")
+}
+
+func initializeTags(dir string) {
+	var entries []fs.DirEntry
+	var err error
+	if entries, err = embedFiles.ReadDir(dir); err != nil {
+		log.Fatalf("embedFiles.ReadDir: %v", err)
+	}
+	for _, entry := range entries {
+		name := fmt.Sprintf("%s/%s", dir, entry.Name())
+		if entry.IsDir() {
+			initializeTags(name)
+		} else {
+			var data []byte
+			if data, err = embedFiles.ReadFile(name); err != nil {
+				log.Fatalf("embedFiles.ReadFile %s: %v", name, err)
+			}
+			hash := sha256.Sum256(data)
+			tag := base64.RawURLEncoding.EncodeToString(hash[:18])
+			embedHashes[name] = tag
+			embedType[name] = mime.TypeByExtension(path.Ext(name))
+			if embedType[name][:9] == "text/html" {
+				embedTemplate[name] = template.Must(template.New(name).Parse(string(data)))
+			}
 		}
 	}
 }
@@ -539,6 +565,9 @@ type TemplateData struct {
 	User  string
 }
 
+//go:embed ui/*[^~]
+var embedFiles embed.FS
+
 // GET /
 func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
@@ -546,7 +575,10 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if path == "" {
 		path = "index.html"
 	}
-	var content, weak, etag string
+	// Everything lives under ui/
+	path = "ui/" + path
+	var weak, etag string
+	var content []byte
 	var ok bool
 	// Prepare the content and compute the etag
 	var template *template.Template
@@ -568,7 +600,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 		} else {
 			etag = embedHashes[path]
 		}
-	} else if content, ok = embedContent[path]; ok {
+	} else if content, err = embedFiles.ReadFile(path); err == nil {
 		etag = embedHashes[path]
 	} else {
 		http.Error(w, "not found", http.StatusNotFound)
@@ -596,7 +628,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 			http.Error(w, "cannot serve page", http.StatusInternalServerError)
 			return
 		}
-		content = writer.String()
+		content = []byte(writer.String())
 	}
 	w.Header().Set("Content-Type", embedType[path])
 	if template == nil {
@@ -609,7 +641,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	}
 	if requestCondition {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(content))
+		w.Write(content)
 	} else {
 		w.WriteHeader(http.StatusNotModified)
 	}
