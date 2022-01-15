@@ -1511,7 +1511,7 @@ var embedContent = map[string]string{
 }
 var embedType = map[string]string{
 	"app.css":          "text/css",
-	"app.js":           "application/javascript",
+	"app.js":           "text/javascript",
 	"delaccount.html":  "text/html",
 	"deluser.html":     "text/html",
 	"distribute.html":  "text/html",
