@@ -7,10 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ewxrjk/bank"
-	"github.com/ewxrjk/bank/util"
-	"github.com/gorilla/handlers"
-	"github.com/spf13/cobra"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,6 +15,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ewxrjk/bank"
+	"github.com/ewxrjk/bank/util"
+	"github.com/gorilla/handlers"
+	"github.com/spf13/cobra"
 )
 
 var serverAddress, serverKey, serverCert string

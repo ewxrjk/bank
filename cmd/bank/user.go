@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
+
+	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var userPassword string

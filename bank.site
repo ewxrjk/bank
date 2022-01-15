@@ -1,5 +1,5 @@
 <VirtualHost *:80>
-	ServerAdmin webmaster@sfere.greenend.org.uk
+	ServerAdmin webmaster@anjou.terraraq.uk
 	ServerName testbank.anjou.terraraq.org.uk
         ServerAlias testbank
 	DocumentRoot /var/www/testbank

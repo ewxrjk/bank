@@ -9,14 +9,12 @@ This is web application for tracking shared finances within a small, mutually tr
 You will need:
 
 - [Go](https://golang.org/)
-- [dep](https://github.com/golang/dep)
 - [Sqlite](https://www.sqlite.org/)
 
 To build and self-test the software:
 
-    $ go get github.com/ewxrjk/bank
-    $ cd ${GOPATH:-$HOME/go}/src/github.com/ewxrjk/bank
-    $ dep ensure
+    $ git clone https://github.com/ewxrjk/bank.git
+    $ cd bank
     $ make
 
 To install the `bank` command in `/usr/local/bin`:
