@@ -11,10 +11,10 @@ import (
 	"html/template"
 	"io/fs"
 	"log"
-	"mime"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -525,9 +525,6 @@ var embedTemplate = map[string]*template.Template{}
 // it can't be directly used as an entity tag.
 var embedHashes = map[string]string{}
 
-// embedType is the map of fixed paths to content types.
-var embedType = map[string]string{}
-
 func init() {
 	initializeTags("ui")
 }
@@ -535,8 +532,8 @@ func init() {
 func initializeTags(dir string) {
 	var entries []fs.DirEntry
 	var err error
-	if entries, err = embedFiles.ReadDir(dir); err != nil {
-		log.Fatalf("embedFiles.ReadDir: %v", err)
+	if entries, err = content.ReadDir(dir); err != nil {
+		log.Fatalf("content.ReadDir: %v", err)
 	}
 	for _, entry := range entries {
 		name := fmt.Sprintf("%s/%s", dir, entry.Name())
@@ -544,14 +541,13 @@ func initializeTags(dir string) {
 			initializeTags(name)
 		} else {
 			var data []byte
-			if data, err = embedFiles.ReadFile(name); err != nil {
-				log.Fatalf("embedFiles.ReadFile %s: %v", name, err)
+			if data, err = content.ReadFile(name); err != nil {
+				log.Fatalf("content.ReadFile %s: %v", name, err)
 			}
 			hash := sha256.Sum256(data)
 			tag := base64.RawURLEncoding.EncodeToString(hash[:18])
 			embedHashes[name] = tag
-			embedType[name] = mime.TypeByExtension(path.Ext(name))
-			if embedType[name][:9] == "text/html" {
+			if path.Ext(name) == ".html" {
 				embedTemplate[name] = template.Must(template.New(name).Parse(string(data)))
 			}
 		}
@@ -566,26 +562,33 @@ type TemplateData struct {
 }
 
 //go:embed ui/*[^~]
-var embedFiles embed.FS
+var content embed.FS
+
+var mimeTypes = map[string]string{
+	".css":  "text/css",
+	".html": "text/html;charset=utf-8",
+	".js":   "text/javascript",
+	".png":  "image/png",
+}
 
 // GET /
 func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	path := r.URL.Path[1:]
-	if path == "" {
-		path = "index.html"
+	name := r.URL.Path[1:]
+	if name == "" {
+		name = "index.html"
 	}
 	// Everything lives under ui/
-	path = "ui/" + path
+	name = "ui/" + name
 	var weak, etag string
-	var content []byte
+	var data []byte
 	var ok bool
 	// Prepare the content and compute the etag
 	var template *template.Template
-	var data TemplateData
-	if template, ok = embedTemplate[path]; ok {
-		data.Token = "not logged in"
-		if data.Title, err = b.GetConfig("title"); err != nil {
+	var templateData TemplateData
+	if template, ok = embedTemplate[name]; ok {
+		templateData.Token = "not logged in"
+		if templateData.Title, err = b.GetConfig("title"); err != nil {
 			log.Printf("getting title: %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
@@ -594,43 +597,35 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 		// making it weak validator.
 		weak = "W/"
 		if session := getSession(w, r); session != nil {
-			data.Token = session.token
-			data.User = session.user
-			etag = embedHashes[path] + session.tag
+			templateData.Token = session.token
+			templateData.User = session.user
+			etag = embedHashes[name] + session.tag
 		} else {
-			etag = embedHashes[path]
+			etag = embedHashes[name]
 		}
-	} else if content, err = embedFiles.ReadFile(path); err == nil {
-		etag = embedHashes[path]
+	} else if data, err = content.ReadFile(name); err == nil {
+		etag = embedHashes[name]
 	} else {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 	// Maybe the request is conditional
-	requestCondition := true
-	for _, h := range r.Header["If-None-Match"] {
-		var tags []util.EntityTag
-		if tags, err = util.ParseEntityTags(h); err != nil {
-			continue // ignore malformed headers
-		}
-		for _, tag := range tags {
-			if tag.All || etag == tag.Tag {
-				requestCondition = false
-				break
-			}
-		}
-	}
+	status := CheckEntityTag(w, r, etag)
 	// Generate the content (if not static)
-	if requestCondition && template != nil {
+	if status == http.StatusOK && template != nil {
 		writer := strings.Builder{}
-		if err = template.Execute(&writer, data); err != nil {
-			log.Printf("cannot serve page: executing template %s: %v", path, err)
+		if err = template.Execute(&writer, templateData); err != nil {
+			log.Printf("cannot serve page: executing template %s: %v", name, err)
 			http.Error(w, "cannot serve page", http.StatusInternalServerError)
 			return
 		}
-		content = []byte(writer.String())
+		data = []byte(writer.String())
 	}
-	w.Header().Set("Content-Type", embedType[path])
+	ct := mimeTypes[filepath.Ext(name)]
+	if ct == "" {
+		ct = "application/octet-string"
+	}
+	w.Header().Set("Content-Type", ct)
 	if template == nil {
 		w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", staticPageLifetime))
 	} else {
@@ -639,10 +634,29 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if etag != "" {
 		w.Header().Set("ETag", fmt.Sprintf(`%s"%s"`, weak, etag))
 	}
-	if requestCondition {
-		w.WriteHeader(http.StatusOK)
-		w.Write(content)
-	} else {
-		w.WriteHeader(http.StatusNotModified)
+	w.WriteHeader(status)
+	if status == http.StatusOK {
+		w.Write(data)
 	}
+}
+
+func CheckEntityTag(w http.ResponseWriter, r *http.Request, etag string) (status int) {
+	if etag != "" {
+		w.Header().Set("ETag", fmt.Sprintf(`"%s"`, etag))
+	}
+	// See if the client has seen it before
+	status = http.StatusOK
+	for _, h := range r.Header["If-None-Match"] {
+		if tags, err := util.ParseEntityTags(h); err != nil {
+			continue // ignore malformed headers
+		} else {
+			for _, tag := range tags {
+				if tag.All || etag == tag.Tag {
+					status = http.StatusNotModified
+					break
+				}
+			}
+		}
+	}
+	return
 }
