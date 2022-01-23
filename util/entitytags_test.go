@@ -15,13 +15,13 @@ func TestParseEntityTags(t *testing.T) {
 		{"empty", "", nil, true},
 		{"spaces", "  ", nil, true},
 		{"commas", ",,", nil, true},
-		{"star", "*", []EntityTag{EntityTag{true, false, ""}}, false},
-		{"starcommas", ",*", []EntityTag{EntityTag{true, false, ""}}, false},
-		{"one", `"wibble"`, []EntityTag{EntityTag{false, false, "wibble"}}, false},
-		{"two", `"wibble","spong"`, []EntityTag{EntityTag{false, false, "wibble"}, EntityTag{false, false, "spong"}}, false},
-		{"twocommaspace", ` , "wibble" ,, "spong" , `, []EntityTag{EntityTag{false, false, "wibble"}, EntityTag{false, false, "spong"}}, false},
-		{"weak", `W/"wibble"`, []EntityTag{EntityTag{false, true, "wibble"}}, false},
-		{"weakstrong", `W/"wibble", "spong"`, []EntityTag{EntityTag{false, true, "wibble"}, EntityTag{false, false, "spong"}}, false},
+		{"star", "*", []EntityTag{{true, false, ""}}, false},
+		{"starcommas", ",*", []EntityTag{{true, false, ""}}, false},
+		{"one", `"wibble"`, []EntityTag{{false, false, "wibble"}}, false},
+		{"two", `"wibble","spong"`, []EntityTag{{false, false, "wibble"}, {false, false, "spong"}}, false},
+		{"twocommaspace", ` , "wibble" ,, "spong" , `, []EntityTag{{false, false, "wibble"}, {false, false, "spong"}}, false},
+		{"weak", `W/"wibble"`, []EntityTag{{false, true, "wibble"}}, false},
+		{"weakstrong", `W/"wibble", "spong"`, []EntityTag{{false, true, "wibble"}, {false, false, "spong"}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
