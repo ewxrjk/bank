@@ -2,6 +2,8 @@ package util
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"regexp"
 )
 
@@ -59,6 +61,33 @@ func ParseEntityTags(header string) (tags []EntityTag, err error) {
 	if len(tags) == 0 {
 		err = errors.New("malformed entity-tag list: no tags")
 		return
+	}
+	return
+}
+
+// CheckEntityTag sets the ETag response header,
+// and then checks the If-None-Match request header.
+// If it is set and has a match for the entity tag,
+// it returns http.StatusNotModified; in any other
+// case it returns http.StatusOK.
+func CheckEntityTag(w http.ResponseWriter, r *http.Request, etag string) (status int) {
+	status = http.StatusOK
+	if etag == "" {
+		return
+	}
+	w.Header().Set("ETag", fmt.Sprintf(`"%s"`, etag))
+	// See if the client has seen it before
+	for _, h := range r.Header["If-None-Match"] {
+		if tags, err := ParseEntityTags(h); err != nil {
+			continue // ignore malformed headers
+		} else {
+			for _, tag := range tags {
+				if tag.All || etag == tag.Tag {
+					status = http.StatusNotModified
+					break
+				}
+			}
+		}
 	}
 	return
 }

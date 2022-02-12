@@ -610,7 +610,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 		return
 	}
 	// Maybe the request is conditional
-	status := CheckEntityTag(w, r, etag)
+	status := util.CheckEntityTag(w, r, etag)
 	// Generate the content (if not static)
 	if status == http.StatusOK && template != nil {
 		writer := strings.Builder{}
@@ -638,25 +638,4 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if status == http.StatusOK {
 		w.Write(data)
 	}
-}
-
-func CheckEntityTag(w http.ResponseWriter, r *http.Request, etag string) (status int) {
-	if etag != "" {
-		w.Header().Set("ETag", fmt.Sprintf(`"%s"`, etag))
-	}
-	// See if the client has seen it before
-	status = http.StatusOK
-	for _, h := range r.Header["If-None-Match"] {
-		if tags, err := util.ParseEntityTags(h); err != nil {
-			continue // ignore malformed headers
-		} else {
-			for _, tag := range tags {
-				if tag.All || etag == tag.Tag {
-					status = http.StatusNotModified
-					break
-				}
-			}
-		}
-	}
-	return
 }
