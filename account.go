@@ -1,9 +1,12 @@
 package bank
 
 import (
-	"errors"
+	"net/http"
+
 	// sqlite3 "github.com/mattn/go-sqlite3"
 	"database/sql"
+
+	"github.com/ewxrjk/bank/util"
 )
 
 // Account defines a single account.
@@ -16,10 +19,10 @@ type Account struct {
 }
 
 // ErrNoSuchAccount is returned when accessing an account which does not exist.
-var ErrNoSuchAccount = errors.New("account does not exist")
+var ErrNoSuchAccount = util.HTTPError{"account does not exist", http.StatusNotFound}
 
 // ErrAccountHasBalance is returned when deleting a nonempty account.
-var ErrAccountHasBalance = errors.New("account has a nonzero balance")
+var ErrAccountHasBalance = util.HTTPError{"account has a nonzero balance", http.StatusBadRequest}
 
 // GetAccounts returns the list of account names.
 func GetAccounts(tx *sql.Tx) (accounts []string, err error) {

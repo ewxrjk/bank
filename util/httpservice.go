@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/ewxrjk/bank"
 	"log"
 	"net/http"
 	"regexp"
@@ -31,6 +30,16 @@ type HTTPNamespace struct {
 
 	// regexps is the compiler regexps from Path fields.
 	regexps []*regexp.Regexp
+}
+
+// HTTPError
+type HTTPError struct {
+	Message string
+	Code    int
+}
+
+func (h HTTPError) Error() string {
+	return h.Message
 }
 
 // Initialize prepares an HTTPNamespace for use.
@@ -74,20 +83,14 @@ func HTTPRespond(w http.ResponseWriter, jres interface{}) {
 }
 
 // HTTPErrorResponse issues an error response appropriate to err.
+// If err has type HTTPError then the code from that is issued;
+// otherwise http.StatusInternalServerError is issued.
 func HTTPErrorResponse(w http.ResponseWriter, err error, action string) {
 	log.Printf("%s: %v", action, err)
-	switch err {
-	case bank.ErrUserExists,
-		bank.ErrAccountExists,
-		bank.ErrAccountHasBalance,
-		bank.ErrInsufficientFunds,
-		bank.ErrUnsuitableParties:
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	case bank.ErrNoSuchAccount,
-		bank.ErrNoSuchConfig,
-		bank.ErrNoSuchUser:
-		http.Error(w, err.Error(), http.StatusNotFound)
+	switch e := err.(type) {
+	case HTTPError:
+		http.Error(w, err.Error(), e.Code)
 	default:
-		http.Error(w, action, http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

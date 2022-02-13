@@ -2,7 +2,9 @@ package bank
 
 import (
 	"database/sql"
-	"errors"
+	"net/http"
+
+	"github.com/ewxrjk/bank/util"
 )
 
 var defaultConfig = map[string]string{
@@ -11,7 +13,7 @@ var defaultConfig = map[string]string{
 }
 
 // ErrNoSuchConfig is return when a nonexistent configuration item is accessed.
-var ErrNoSuchConfig = errors.New("no such configuration item")
+var ErrNoSuchConfig = util.HTTPError{"no such configuration item", http.StatusNotFound}
 
 // GetConfigs returns the full configuration table.
 func GetConfigs(tx *sql.Tx) (config map[string]string, err error) {

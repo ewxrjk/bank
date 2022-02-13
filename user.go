@@ -1,9 +1,12 @@
 package bank
 
 import (
-	"errors"
+
 	// sqlite3 "github.com/mattn/go-sqlite3"
 	"database/sql"
+	"net/http"
+
+	"github.com/ewxrjk/bank/util"
 )
 
 // User defines a single user.
@@ -16,7 +19,7 @@ type User struct {
 }
 
 // ErrNoSuchUser is returned when accessing a user who does not exist.
-var ErrNoSuchUser = errors.New("user does not exist")
+var ErrNoSuchUser = util.HTTPError{"user does not exist", http.StatusNotFound}
 
 // GetUsers returns the list of user names.
 func GetUsers(tx *sql.Tx) (users []string, err error) {

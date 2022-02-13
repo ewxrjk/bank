@@ -2,9 +2,11 @@ package bank
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"net/http"
 	"time"
+
+	"github.com/ewxrjk/bank/util"
 )
 
 // Bank wraps access to a bank database.
@@ -13,16 +15,16 @@ type Bank struct {
 }
 
 // ErrUserExists is returned when creating a user that already exists.
-var ErrUserExists = errors.New("user exists")
+var ErrUserExists = util.HTTPError{"user exists", http.StatusBadRequest}
 
 // ErrAccountExists is returned when creating an account that already exists.
-var ErrAccountExists = errors.New("account exists")
+var ErrAccountExists = util.HTTPError{"account exists", http.StatusBadRequest}
 
 // ErrInsufficientFunds is returned when there are insufficient funds for some action.
-var ErrInsufficientFunds = errors.New("insufficient funds")
+var ErrInsufficientFunds = util.HTTPError{"insufficient funds", http.StatusBadRequest}
 
 // ErrUnsuitableParties is returned when there is something wrong with the proposed parties to a transaction.
-var ErrUnsuitableParties = errors.New("invalid or inconsistent parties to transaction")
+var ErrUnsuitableParties = util.HTTPError{"invalid or inconsistent parties to transaction", http.StatusBadRequest}
 
 // NewBank creates a new Bank object.
 func NewBank(driver, source string) (b *Bank, err error) {
