@@ -21,8 +21,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ewxrjk/bank"
-	"github.com/ewxrjk/bank/util"
+	"github.com/ewxrjk/bank/pkg/bank"
+	"github.com/ewxrjk/bank/pkg/bcommon"
 	"github.com/gorilla/handlers"
 	"github.com/spf13/cobra"
 )
@@ -66,8 +66,8 @@ var serverCmd = &cobra.Command{
 	},
 }
 
-var namespace = util.HTTPNamespace{
-	Paths: []*util.HTTPPath{
+var namespace = bcommon.HTTPNamespace{
+	Paths: []*bcommon.HTTPPath{
 		{
 			Method:    "POST",
 			Path:      "^/v1/login$",
@@ -225,7 +225,7 @@ func handlePostLogin(w http.ResponseWriter, r *http.Request, matches []string) {
 		HttpOnly: true,
 		Secure:   secure,
 	})
-	util.HTTPRespond(w, &LoginResponse{token})
+	bcommon.HTTPRespond(w, &LoginResponse{token})
 }
 
 // POST /v1/logout/
@@ -258,10 +258,10 @@ func handleGetUser(w http.ResponseWriter, r *http.Request, matches []string) {
 	}
 	var users []string
 	if users, err = b.GetUsers(); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot get users")
+		bcommon.HTTPErrorResponse(w, err, "cannot get users")
 		return
 	}
-	util.HTTPRespond(w, &users)
+	bcommon.HTTPRespond(w, &users)
 }
 
 // NewUserRequest is the JSON request to create a new user.
@@ -286,7 +286,7 @@ func handlePostUser(w http.ResponseWriter, r *http.Request, matches []string) {
 		return
 	}
 	if err = b.NewUser(jreq.User, jreq.Password); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot create user")
+		bcommon.HTTPErrorResponse(w, err, "cannot create user")
 		return
 	}
 	http.Error(w, "created user", http.StatusOK)
@@ -305,7 +305,7 @@ func handlePutUserPassword(w http.ResponseWriter, r *http.Request, matches []str
 		return
 	}
 	if err = b.SetPassword(matches[1], jreq.Password); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot set password")
+		bcommon.HTTPErrorResponse(w, err, "cannot set password")
 		return
 	}
 	http.Error(w, "changed password", http.StatusOK)
@@ -317,7 +317,7 @@ func handleDeleteUser(w http.ResponseWriter, r *http.Request, matches []string) 
 		return
 	}
 	if err = b.DeleteUser(matches[1]); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot delete user")
+		bcommon.HTTPErrorResponse(w, err, "cannot delete user")
 		return
 	}
 }
@@ -339,7 +339,7 @@ func handlePostAccount(w http.ResponseWriter, r *http.Request, matches []string)
 		return
 	}
 	if err = b.NewAccount(jreq.Account); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot create account")
+		bcommon.HTTPErrorResponse(w, err, "cannot create account")
 		return
 	}
 	http.Error(w, "created account", http.StatusOK)
@@ -352,10 +352,10 @@ func handleGetAccount(w http.ResponseWriter, r *http.Request, matches []string) 
 	var accounts []string
 	var err error
 	if accounts, err = b.GetAccounts(); err != nil {
-		util.HTTPErrorResponse(w, err, "getting accounts")
+		bcommon.HTTPErrorResponse(w, err, "getting accounts")
 		return
 	}
-	util.HTTPRespond(w, &accounts)
+	bcommon.HTTPRespond(w, &accounts)
 }
 
 func handleDeleteAccount(w http.ResponseWriter, r *http.Request, matches []string) {
@@ -364,7 +364,7 @@ func handleDeleteAccount(w http.ResponseWriter, r *http.Request, matches []strin
 		return
 	}
 	if err = b.DeleteAccount(matches[1]); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot delete account")
+		bcommon.HTTPErrorResponse(w, err, "cannot delete account")
 		return
 	}
 }
@@ -387,7 +387,7 @@ func handlePostTransaction(w http.ResponseWriter, r *http.Request, matches []str
 		return
 	}
 	if err = b.NewTransaction(session.user, jreq.Origin, jreq.Destination, jreq.Description, jreq.Amount); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot create transaction")
+		bcommon.HTTPErrorResponse(w, err, "cannot create transaction")
 		return
 	}
 	http.Error(w, "created transaction", http.StatusOK)
@@ -408,10 +408,10 @@ func handleGetTransaction(w http.ResponseWriter, r *http.Request, matches []stri
 	after, _ := strconv.Atoi(r.FormValue("after"))
 	var transactions []bank.Transaction
 	if transactions, err = b.GetTransactions(limit, offset, after); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot get transactions")
+		bcommon.HTTPErrorResponse(w, err, "cannot get transactions")
 		return
 	}
-	util.HTTPRespond(w, transactions)
+	bcommon.HTTPRespond(w, transactions)
 }
 
 // DistributeRequest is the JSON request to create distribution transactions.
@@ -432,7 +432,7 @@ func handlePostDistribute(w http.ResponseWriter, r *http.Request, matches []stri
 		return
 	}
 	if err = b.Distribute(session.user, jreq.Origin, jreq.Destinations, jreq.Description); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot distribute")
+		bcommon.HTTPErrorResponse(w, err, "cannot distribute")
 		return
 	}
 	http.Error(w, "distributed", http.StatusOK)
@@ -445,10 +445,10 @@ func handleGetConfig(w http.ResponseWriter, r *http.Request, matches []string) {
 	var configs map[string]string
 	var err error
 	if configs, err = b.GetConfigs(); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot get configuration item")
+		bcommon.HTTPErrorResponse(w, err, "cannot get configuration item")
 		return
 	}
-	util.HTTPRespond(w, configs)
+	bcommon.HTTPRespond(w, configs)
 }
 
 func handleGetConfigKey(w http.ResponseWriter, r *http.Request, matches []string) {
@@ -485,7 +485,7 @@ func handlePutConfigKey(w http.ResponseWriter, r *http.Request, matches []string
 		return
 	}
 	if err = b.PutConfig(matches[1], jreq.Value); err != nil {
-		util.HTTPErrorResponse(w, err, "cannot set configuration item")
+		bcommon.HTTPErrorResponse(w, err, "cannot set configuration item")
 		return
 	}
 	http.Error(w, "set configuration item", http.StatusOK)
@@ -500,7 +500,7 @@ var embedTemplate = map[string]*template.Template{}
 var embedHashes = map[string]string{}
 
 func init() {
-	initializeTags("ui")
+	initializeTags("web")
 }
 
 func initializeTags(dir string) {
@@ -536,7 +536,7 @@ type TemplateData struct {
 	Version string
 }
 
-//go:embed ui/*[^~]
+//go:embed web/*[^~]
 var content embed.FS
 
 var mimeTypes = map[string]string{
@@ -553,8 +553,8 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if name == "" {
 		name = "index.html"
 	}
-	// Everything lives under ui/
-	name = "ui/" + name
+	// Everything lives under web/
+	name = "web/" + name
 	var weak, etag string
 	var data []byte
 	var ok bool
@@ -586,7 +586,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 		return
 	}
 	// Maybe the request is conditional
-	status := util.CheckEntityTag(w, r, etag)
+	status := bcommon.CheckEntityTag(w, r, etag)
 	// Generate the content (if not static)
 	if status == http.StatusOK && template != nil {
 		writer := strings.Builder{}

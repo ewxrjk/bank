@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/ewxrjk/bank"
+	"github.com/ewxrjk/bank/pkg/bank"
 	"github.com/spf13/cobra"
 )
 

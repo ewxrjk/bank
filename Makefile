@@ -1,7 +1,7 @@
 GOPATH:=$(shell go env GOPATH)
 bindir=/usr/local/bin
 INSTALL=install
-EMBED=$(sort $(wildcard cmd/bank/ui/*.html cmd/bank/ui/*.png) cmd/bank/ui/app.js cmd/bank/ui/app.css)
+EMBED=$(sort $(wildcard cmd/bank/web/*.html cmd/bank/web/*.png) cmd/bank/web/app.js cmd/bank/web/app.css)
 
 all: check
 
@@ -10,7 +10,7 @@ bank: $(wildcard *.go) $(wildcard cmd/bank/*.go) $(wildcard */*.go) $(EMBED) ver
 
 check: bank
 	go test -v ./...
-	./gbtest.py
+	scripts/gbtest.py
 
 version.go: scripts/make-version $(wildcard *.go) $(wildcard cmd/bank/*.go) $(wildcard */*.go)
 	scripts/make-version > version.go

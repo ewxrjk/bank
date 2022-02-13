@@ -1,4 +1,4 @@
-package util
+package bcommon
 
 import (
 	"encoding/json"
