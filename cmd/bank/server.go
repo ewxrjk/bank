@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -28,10 +29,13 @@ import (
 
 var serverAddress, serverKey, serverCert string
 var staticPageLifetime int
+var debug bool
 
 func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
+	serverCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "log extra information for debugging (insecure)")
+	// see use sites for why debug is 'isnecure'
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
 	serverCmd.PersistentFlags().IntVarP(&staticPageLifetime, "lifetime", "L", 60, "static page lifetime")
 }
@@ -64,22 +68,86 @@ var serverCmd = &cobra.Command{
 
 var namespace = util.HTTPNamespace{
 	Paths: []*util.HTTPPath{
-		{"POST", "^/v1/login$", handlePostLogin},
-		{"POST", "^/v1/logout$", handlePostLogout},
-		{"GET", "^/v1/user/?$", handleGetUser},
-		{"POST", "^/v1/user/?$", handlePostUser},
-		{"PUT", "^/v1/user/([^/]+)/password$", handlePutUserPassword},
-		{"DELETE", "^/v1/user/([^/]+)$", handleDeleteUser},
-		{"GET", "^/v1/account/?$", handleGetAccount},
-		{"POST", "^/v1/account/?$", handlePostAccount},
-		{"DELETE", "^/v1/account/([^/]+)$", handleDeleteAccount},
-		{"GET", "^/v1/transaction/?$", handleGetTransaction},
-		{"POST", "^/v1/transaction/?$", handlePostTransaction},
-		{"POST", "^/v1/distribute/?$", handlePostDistribute},
-		{"GET", "^/v1/config/?$", handleGetConfig},
-		{"GET", "^/v1/config/([^/]+)$", handleGetConfigKey},
-		{"PUT", "^/v1/config/([^/]+)$", handlePutConfigKey},
-		{"GET", "^/.*", handleGetRoot},
+		{
+			Method:    "POST",
+			Path:      "^/v1/login$",
+			ServeHTTP: handlePostLogin,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/logout$",
+			ServeHTTP: handlePostLogout,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/user/?$",
+			ServeHTTP: handleGetUser,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/user/?$",
+			ServeHTTP: handlePostUser,
+		},
+		{
+			Method:    "PUT",
+			Path:      "^/v1/user/([^/]+)/password$",
+			ServeHTTP: handlePutUserPassword,
+		},
+		{
+			Method:    "DELETE",
+			Path:      "^/v1/user/([^/]+)$",
+			ServeHTTP: handleDeleteUser,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/account/?$",
+			ServeHTTP: handleGetAccount,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/account/?$",
+			ServeHTTP: handlePostAccount,
+		},
+		{
+			Method:    "DELETE",
+			Path:      "^/v1/account/([^/]+)$",
+			ServeHTTP: handleDeleteAccount,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/transaction/?$",
+			ServeHTTP: handleGetTransaction,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/transaction/?$",
+			ServeHTTP: handlePostTransaction,
+		},
+		{
+			Method:    "POST",
+			Path:      "^/v1/distribute/?$",
+			ServeHTTP: handlePostDistribute,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/config/?$",
+			ServeHTTP: handleGetConfig,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/v1/config/([^/]+)$",
+			ServeHTTP: handleGetConfigKey,
+		},
+		{
+			Method:    "PUT",
+			Path:      "^/v1/config/([^/]+)$",
+			ServeHTTP: handlePutConfigKey,
+		},
+		{
+			Method:    "GET",
+			Path:      "^/.*",
+			ServeHTTP: handleGetRoot,
+		},
 	},
 }
 
@@ -93,7 +161,7 @@ type Session struct {
 	// Non-cookie coken
 	token string
 
-	// Epxiry time
+	// Expiry time
 	expires time.Time
 
 	// Tag for cache (in)validation
@@ -111,7 +179,7 @@ type LoginRequest struct {
 	Password string
 }
 
-// LoginResponse is  the JSON respons for a succesful login
+// LoginResponse is  the JSON response for a succesful login
 type LoginResponse struct {
 	Token string
 }
@@ -126,7 +194,13 @@ func handlePostLogin(w http.ResponseWriter, r *http.Request, matches []string) {
 		return
 	}
 	if err = b.CheckPassword(jreq.User, jreq.Password); err != nil {
-		log.Printf("CheckPassword for %v: %v", jreq.User, err)
+		// Sometimes passwords are accidentally entered into username fields,
+		// so don't log usernames unless debug is enabled.
+		if debug {
+			log.Printf("CheckPassword for %v: %v", jreq.User, err)
+		} else {
+			log.Printf("CheckPassword: %v", err)
+		}
 		http.Error(w, "invalid credentials", http.StatusForbidden)
 		return
 	}
@@ -177,39 +251,9 @@ func handlePostLogout(w http.ResponseWriter, r *http.Request, matches []string) 
 	http.Error(w, "logged out", http.StatusOK)
 }
 
-func getSession(w http.ResponseWriter, r *http.Request) (session *Session) {
-	var c *http.Cookie
-	var err error
-	if c, err = r.Cookie(cookieName); err != nil {
-		return
-	}
-	sessionLock.Lock()
-	defer sessionLock.Unlock()
-	var ok bool
-	if session, ok = sessions[c.Value]; !ok {
-		log.Printf("session %v unrecognized", c.Value)
-		return
-	}
-	if time.Now().After(session.expires) {
-		log.Printf("session %v expired", c.Value)
-		delete(sessions, c.Value)
-		session = nil
-		return
-	}
-	return
-}
-
-func mustSession(w http.ResponseWriter, r *http.Request) (session *Session) {
-	if session = getSession(w, r); session == nil {
-		http.Error(w, "not logged in", http.StatusForbidden)
-	}
-	return
-}
-
 func handleGetUser(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	var users []string
@@ -229,19 +273,8 @@ type NewUserRequest struct {
 
 func handlePostUser(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
 	var jreq NewUserRequest
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		log.Printf("decoding JSON: %v", err)
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
+	if _, ok := decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
 	if jreq.User == "" {
@@ -267,19 +300,8 @@ type ChangePasswordRequest struct {
 
 func handlePutUserPassword(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
 	var jreq ChangePasswordRequest
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		log.Printf("decoding JSON: %v", err)
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
+	if _, ok := decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
 	if err = b.SetPassword(matches[1], jreq.Password); err != nil {
@@ -291,8 +313,7 @@ func handlePutUserPassword(w http.ResponseWriter, r *http.Request, matches []str
 
 func handleDeleteUser(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	if err = b.DeleteUser(matches[1]); err != nil {
@@ -308,19 +329,9 @@ type NewAccountRequest struct {
 }
 
 func handlePostAccount(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
-	var jreq NewAccountRequest
 	var err error
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
+	var jreq NewAccountRequest
+	if _, ok := decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
 	if jreq.Account == "" {
@@ -335,8 +346,7 @@ func handlePostAccount(w http.ResponseWriter, r *http.Request, matches []string)
 }
 
 func handleGetAccount(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	var accounts []string
@@ -350,8 +360,7 @@ func handleGetAccount(w http.ResponseWriter, r *http.Request, matches []string) 
 
 func handleDeleteAccount(w http.ResponseWriter, r *http.Request, matches []string) {
 	var err error
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	if err = b.DeleteAccount(matches[1]); err != nil {
@@ -371,19 +380,10 @@ type NewTransactionRequest struct {
 
 func handlePostTransaction(w http.ResponseWriter, r *http.Request, matches []string) {
 	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
+	var ok bool
 	var err error
 	var jreq NewTransactionRequest
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		log.Printf("decoding JSON: %v", err)
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
+	if session, ok = decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
 	if err = b.NewTransaction(session.user, jreq.Origin, jreq.Destination, jreq.Description, jreq.Amount); err != nil {
@@ -394,8 +394,7 @@ func handlePostTransaction(w http.ResponseWriter, r *http.Request, matches []str
 }
 
 func handleGetTransaction(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	var err error
@@ -425,36 +424,22 @@ type DistributeRequest struct {
 
 // POST /v1/distribute/
 func handlePostDistribute(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
 	var err error
-	if r.Method == "POST" {
-		var jreq DistributeRequest
-		if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		if jreq.Token != session.token {
-			log.Printf("token mismatch")
-			http.Error(w, "inconsistent session", http.StatusForbidden)
-			return
-		}
-		if err = b.Distribute(session.user, jreq.Origin, jreq.Destinations, jreq.Description); err != nil {
-			util.HTTPErrorResponse(w, err, "cannot distribute")
-			return
-		}
-		http.Error(w, "distributed", http.StatusOK)
-	} else {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	var jreq DistributeRequest
+	var session *Session
+	var ok bool
+	if session, ok = decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
+	if err = b.Distribute(session.user, jreq.Origin, jreq.Destinations, jreq.Description); err != nil {
+		util.HTTPErrorResponse(w, err, "cannot distribute")
+		return
+	}
+	http.Error(w, "distributed", http.StatusOK)
 }
 
 func handleGetConfig(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	var configs map[string]string
@@ -467,8 +452,7 @@ func handleGetConfig(w http.ResponseWriter, r *http.Request, matches []string) {
 }
 
 func handleGetConfigKey(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
+	if _, ok := decodeRequest(w, r, nil, true); !ok {
 		return
 	}
 	var value string
@@ -495,19 +479,9 @@ type ConfigRequest struct {
 }
 
 func handlePutConfigKey(w http.ResponseWriter, r *http.Request, matches []string) {
-	var session *Session
-	if session = mustSession(w, r); session == nil {
-		return
-	}
 	var jreq ConfigRequest
 	var err error
-	if err = json.NewDecoder(r.Body).Decode(&jreq); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
-		return
-	}
-	if jreq.Token != session.token {
-		log.Printf("token mismatch")
-		http.Error(w, "inconsistent session", http.StatusForbidden)
+	if _, ok := decodeRequest(w, r, &jreq, true); !ok {
 		return
 	}
 	if err = b.PutConfig(matches[1], jreq.Value); err != nil {
@@ -556,9 +530,10 @@ func initializeTags(dir string) {
 
 // TemplateData is the data object type for template execution.
 type TemplateData struct {
-	Token string
-	Title string
-	User  string
+	Token   string
+	Title   string
+	User    string
+	Version string
 }
 
 //go:embed ui/*[^~]
@@ -586,6 +561,7 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	// Prepare the content and compute the etag
 	var template *template.Template
 	var templateData TemplateData
+	templateData.Version = bank.Version
 	if template, ok = embedTemplate[name]; ok {
 		templateData.Token = "not logged in"
 		if templateData.Title, err = b.GetConfig("title"); err != nil {
@@ -638,4 +614,86 @@ func handleGetRoot(w http.ResponseWriter, r *http.Request, matches []string) {
 	if status == http.StatusOK {
 		w.Write(data)
 	}
+}
+
+// decodeRequest decodes and authenticates a request.
+//
+// w and r are the normal HTTP request response/request pair.
+//
+// req is a pointer to the request object to be filled in, or nil if there isn't one.
+// If it has a Token field then it must match the token from the session.
+//
+// If mustAuth is true then a cookie identifying a live session must be specified
+// (and it will be returned).
+func decodeRequest(w http.ResponseWriter, r *http.Request, req interface{}, mustAuth bool) (session *Session, ok bool) {
+	var err error
+	if mustAuth {
+		// We need a live session
+		if session = getSession(w, r); session == nil {
+			http.Error(w, "not logged in", http.StatusForbidden)
+			return
+		}
+	}
+	if req != nil {
+		// Decode the request
+		if err = json.NewDecoder(r.Body).Decode(req); err != nil {
+			log.Printf("decoding JSON: %v", err)
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		// If there the request expects a token then check it matches the session
+		// This is an anti-CSRF measure.
+		if f, found := reflect.TypeOf(req).Elem().FieldByName("Token"); found {
+			fv := reflect.ValueOf(req).Elem().FieldByIndex(f.Index)
+			if fv.String() != session.token {
+				log.Printf("token mismatch")
+				http.Error(w, "inconsistent session", http.StatusForbidden)
+				return
+			}
+		}
+	}
+	ok = true
+	return
+}
+
+// getSession get a valid session from an HTTP request.
+// On error it writes an HTTP error and returns nil.
+func getSession(w http.ResponseWriter, r *http.Request) (session *Session) {
+	var c *http.Cookie
+	var err error
+	// Find the cookie from the HTTP request
+	if c, err = r.Cookie(cookieName); err != nil {
+		return
+	}
+	// Synchronize access to the session store
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	// Unrecognized and stale sessions should never become valid again,
+	// so should be harmless to log - nevertheless we hide them unless
+	// debug is enabled, in case something undermines our assumptions
+	// (e.g. VM snapshot restoration).
+
+	// Find the session
+	var ok bool
+	if session, ok = sessions[c.Value]; !ok {
+		if debug {
+			log.Printf("session %v unrecognized", c.Value)
+		} else {
+			log.Printf("session unrecognized")
+		}
+		return
+	}
+	// Check the session has not expired
+	if time.Now().After(session.expires) {
+		if debug {
+			log.Printf("session %v expired", c.Value)
+		} else {
+			log.Printf("session expired")
+		}
+		// Garbage-collect expired sesions
+		delete(sessions, c.Value)
+		session = nil
+		return
+	}
+	return
 }

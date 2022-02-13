@@ -103,7 +103,7 @@ function transactionToRow(transaction) {
     var tr, td, time, j
     tr = $("<tr>");
     time = new Date(transaction["Time"] * 1000)
-    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth(), 2) + "-" + pad(time.getUTCDate(), 2)
+    time = (time.getUTCFullYear() + "-" + pad(time.getUTCMonth() + 1, 2) + "-" + pad(time.getUTCDate(), 2)
         + " " + pad(time.getUTCHours(), 2) + ":" + pad(time.getUTCMinutes(), 2) + ":" + pad(time.getUTCSeconds(), 2))
     td = $("<td>").addClass("time").text(time);
     tr.append(td)
@@ -133,7 +133,7 @@ function transactionToRow(transaction) {
 
 // New transactions page
 
-// newTransaction issues a transaction creation request.
+// transactionsNew issues a transaction creation request.
 function transactionsNew() {
     $.ajax({
         method: "POST",
@@ -142,13 +142,17 @@ function transactionsNew() {
             Origin: $("#origin").val(),
             Destination: $("#destination").val(),
             Description: $("#description").val(),
-            Amount: Number($("#amount").val()) * 100,
+            Amount: Math.round(Number($("#amount").val()) * 100),
         }),
         url: "/v1/transaction/",
         contentType: "application/json",
         success: function () {
             transactionsRefresh();
             $("#success").text("transaction created");
+            $("#description").val("")
+            $("#amount").val("")
+            validateAll()
+
         },
         error: ajaxFailed,
     });
@@ -203,6 +207,7 @@ function newUser() {
             $("#password").val("");
             $("#password2").val("");
             updateUsers();
+            validateAll()
         },
         error: ajaxFailed,
     });
@@ -283,10 +288,13 @@ function changePassword() {
             Token: $("#token").val(),
             Password: $("#password").val(),
         }),
-        url: "/v1/user/" +$("#user").val() + "/password",
+        url: "/v1/user/" + $("#user").val() + "/password",
         contentType: "application/json",
         success: function () {
             $("#success").text("password changed");
+            $("#password").val("");
+            $("#password2").val("");
+            validateAll()
         },
         error: ajaxFailed,
     });
@@ -308,17 +316,23 @@ function validate(container) {
     var valid;
     // Adjust the cooked transaction form.
     if ($("select#reason").val() == "house") {
+        // Set up the form to be a payment from house to someone else.
+        // This should only be reachable if the house account exists
+        // (see newAccounts).
         $("#originRow").hide();
-        $("#origin").val(config["houseAccount"]); // TODO assumed to exist
+        $("#origin").val(config["houseAccount"]);
         $("#origin").removeClass("human");
     } else if ($("select#reason").val() == "payback") {
         $("#originRow").show();
         $("#origin").addClass("human");
     }
+    // Clear all the error indicators
     valid = true;
     container.find('td.error').text('');
+    // Iterate over the inputs in turn
     container.find('input,select').each(function (i, e) {
         var j, newpasswords, trouble;
+        // Only validate an input if all the previous ones were good
         if (valid) {
             e = $(e)
             if (e.hasClass('nonempty') && e.val() == "") {
@@ -365,10 +379,19 @@ function validate(container) {
                     }
                 });
             }
+            // If there was a problem display it next to the input
             e.parent().next().text(trouble);
         }
     })
+    // Only allow submission if all the inputs are valid
     container.find(".submit").prop("disabled", !valid);
+}
+
+// validateAll revalidates all forms on the page
+function validateAll() {
+    $("form").each(function (i, f) {
+        validate($(f));
+    });
 }
 
 // Error handling
@@ -432,6 +455,7 @@ function initialize() {
             $("#more").on("click", transactionsMore);
         }
         initializeValidation();
+        initializeForms();
     }).fail(ajaxFailed);
 }
 
@@ -456,9 +480,14 @@ function newAccounts(a) {
     // for generic transactions; but we don't do this for the cooked transaction
     // form.
     if (accounts.includes(config["houseAccount"])) {
+        $("#selectHouse").removeAttr('disabled')
         if (!$("select#origin").hasClass("human")) {
             $("select#origin").val(config["houseAccount"]);
         }
+    } else {
+        // No house account. Disabled shared resource transactions.
+        $("#selectHouse").attr('disabled', 'disabled')
+        $("select#reason").val('payback')
     }
 }
 
@@ -479,7 +508,6 @@ function newUsers(u) {
     for (i = 0; i < users.length; i++) {
         select.append($("<option>").text(users[i]));
     }
-   
 }
 
 // initializeValidation sets up form validation logic
@@ -488,7 +516,7 @@ function newUsers(u) {
 function initializeValidation() {
     // Whenever any form is modified...
     $("form").each(function (i, f) {
-        $(f).find("input,select").on("input", function () {
+        $(f).find("input,select").on("input change", function () {
             // ...clear the error & success indicators
             $("#error").text("");
             $("#success").text("");
@@ -507,8 +535,19 @@ function initializeValidation() {
     $("form#delaccount").on("submit", delAccount);
     $("form#changepass").on("submit", changePassword);
     // Initial validation of forms
-    $("form").each(function (i, f) {
-        validate($(f));
+    validateAll()
+}
+
+// initializeForms sets initial values for some of the forms.
+function initializeForms() {
+    // Default human is logged in user, if they have an account
+    $("select.human").each(function (i, f) {
+        user = $("input#user").val()
+        if (accounts.includes(user)) {
+            $(f).val(user)
+        } else {
+            $(f).val("")
+        }
     });
 }
 

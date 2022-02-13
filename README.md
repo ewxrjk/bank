@@ -1,5 +1,7 @@
 # Description
 
+[![Build Status](https://travis-ci.org/ewxrjk/bank.svg?branch=master)](https://travis-ci.org/ewxrjk/bank)
+
 This is web application for tracking shared finances within a small, mutually trusting group.
 
 # Setup
@@ -162,5 +164,9 @@ The token is embedded into HTML pages
 and must be presented with all mutating operations.
 Non-mutating requests require only the cookie.
 
+Usernames and session IDs are only ever logged by the server if the `--debug` option is used.
+
 The JavaScript UI uses [jQuery](https://jquery.com/) heavily.
 It constrains the jQuery code using sub-resource integrity.
+
+Release tags are signed by PGP key [9006B0ED710DB81B76D368D9D3388BA18A741BEF](https://www.greenend.org.uk/rjk/misc/8A741BEF.asc).

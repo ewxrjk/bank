@@ -170,7 +170,7 @@ func (b *Bank) CheckPassword(user, password string) (err error) {
 		return
 	})
 	if err != nil && err != ErrPasswordMismatch && err != ErrNoSuchUser {
-		err = fmt.Errorf("verifying password for %s: %v", user, err)
+		err = fmt.Errorf("verifying password: %v", err)
 	}
 	return
 }
@@ -244,10 +244,10 @@ func (b *Bank) GetTransactions(limit, offset int, after int) (transactions []Tra
 func (b *Bank) NewTransaction(user, origin, destination, description string, amount int) (err error) {
 	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
 		var o, d Account
-		if o.Get(tx, origin); err != nil {
+		if err = o.Get(tx, origin); err != nil {
 			return
 		}
-		if d.Get(tx, destination); err != nil {
+		if err = d.Get(tx, destination); err != nil {
 			return
 		}
 		if err = newTransaction(tx, user, &o, &d, description, amount); err != nil {
@@ -308,7 +308,7 @@ func (b *Bank) Distribute(user string, origin string, destinations []string, des
 	}
 	err = Transact(b.DB, func(tx *sql.Tx) (err error) {
 		var o Account
-		if o.Get(tx, origin); err != nil {
+		if err = o.Get(tx, origin); err != nil {
 			return
 		}
 		amount := o.Balance / len(destinations)

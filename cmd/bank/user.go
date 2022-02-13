@@ -42,6 +42,26 @@ var userAddCmd = &cobra.Command{
 		return
 	},
 }
+var userListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List user logins",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		if err = setup(); err != nil {
+			return
+		}
+		var users []string
+		if users, err = b.GetUsers(); err != nil {
+			return
+		}
+		for _, u := range users {
+			if _, err = fmt.Println(u); err != nil {
+				return
+			}
+		}
+		return
+	},
+}
 
 var userPwCmd = &cobra.Command{
 	Use:   "pw USER",
@@ -66,6 +86,7 @@ var userPwCmd = &cobra.Command{
 
 func init() {
 	userCmd.AddCommand(userAddCmd)
+	userCmd.AddCommand(userListCmd)
 	userCmd.AddCommand(userPwCmd)
 }
 

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/ewxrjk/bank"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var rootCmd = cobra.Command{
@@ -22,6 +23,7 @@ func main() {
 	rootCmd.AddCommand(userCmd)
 	rootCmd.AddCommand(serverCmd)
 	rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(versionCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("bank: %s", err)
 	}

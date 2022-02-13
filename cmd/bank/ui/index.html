@@ -3,8 +3,8 @@
 
 <head>
     <title>Transactions ({{.Title}})</title>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/app.js"></script>
     <link rel=StyleSheet type="text/css" href="/app.css">
 </head>
@@ -45,8 +45,8 @@
                 <td>What happened</td>
                 <td>
                     <select name="reason" id=reason>
-                        <option value=house selected>Bought a shared resource</option>
-                        <option value=payback>Repaid another party</option>
+                        <option id=selectHouse value=house selected>Bought a shared resource</option>
+                        <option id=selectPayback value=payback>Repaid another party</option>
                     </select>
                 </td>
                 <td class=error></td>
@@ -89,26 +89,32 @@
             </tr>
         </table>
         <input name=token type=hidden value="{{.Token}}" id=token>
+        <input name=user type=hidden value="{{.User}}" id=user>
     </form>
 
     <hr>
 
-    <table class=transactions>
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>ID</th>
-                <th>User</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>From</th>
-                <th>To</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <button id=more>More...</button>
+    <div class=transactions>
+        <table class=transactions>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>From</th>
+                    <th>To</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button id=more>More...</button>
+    </div>
+
+    <hr>
+    <p class=project><a href="https://github.com/ewxrjk/bank">Bank</a> ({{.Version}})</p>
 </body>
 
 </html>

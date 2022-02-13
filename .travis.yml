@@ -1,0 +1,14 @@
+dist: xenial
+addons:
+  apt:
+    update: true
+    packages:
+    -  python3-requests
+
+language: go
+go:
+  - "1.12"
+  - master
+
+script:
+  - make check

@@ -4,3 +4,5 @@
 /embed
 /.vscode
 /*.db
+_test.db
+/version.go
