@@ -35,7 +35,7 @@ func init() {
 	serverCmd.PersistentFlags().StringVarP(&serverAddress, "address", "a", "localhost:80", "listen address")
 	serverCmd.PersistentFlags().StringVarP(&serverCert, "cert", "c", "", "server certificate")
 	serverCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "log extra information for debugging (insecure)")
-	// see use sites for why debug is 'isnecure'
+	// see use sites for why debug is 'insecure'
 	serverCmd.PersistentFlags().StringVarP(&serverKey, "key", "k", "", "server private key")
 	serverCmd.PersistentFlags().IntVarP(&staticPageLifetime, "lifetime", "L", 60, "static page lifetime")
 }

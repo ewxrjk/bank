@@ -5,4 +5,4 @@
 /.vscode
 /*.db
 _test.db
-/version.go
+/pkg/bank/version.go
